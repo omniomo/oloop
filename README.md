@@ -2,12 +2,11 @@
   <img src="site/assets/logo.svg" width="88" alt="">
 </p>
 
-<h1 align="center">Oloop</h1>
+<h1 align="center"><a href="https://oloop.ooooomo.com/">Oloop</a></h1>
 
 <p align="center">
   Social media on autopilot.<br>
-  A Chrome extension that posts one draft to ten platforms.<br>
-  <a href="https://oloop.ooooomo.com">oloop.ooooomo.com</a>
+  A Chrome extension that posts one draft to ten platforms.
 </p>
 
 <p align="center">
@@ -22,7 +21,7 @@ Write once in the side panel. Oloop opens each platform's own composer in the br
 
 ## Install
 
-Until it's on the Chrome Web Store: download this repo, open `chrome://extensions`, turn on Developer mode, choose **Load unpacked** and pick the `extension` folder.
+Download the `oloop-*.zip` package from the [latest release](https://github.com/omniomo/oloop/releases/latest) and unzip it. Open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked**, and choose the folder containing `manifest.json`.
 
 ## Develop
 
