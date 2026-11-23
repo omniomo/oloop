@@ -67,7 +67,7 @@ for (const [lang, path] of Object.entries(PRIVACY)) {
   const s = S[lang];
   const v = {
     ...shared, ...s, lang, path, home, lang_name: name,
-    title: esc(`${s.privacy} — oloop`), desc: esc(s.desc),
+    title: esc(`${s.privacy} — Oloop`), desc: esc(s.desc),
     privacy_href: path,
     alternates: Object.entries(PRIVACY).map(([l, p]) => `    <link rel="alternate" hreflang="${l}" href="https://oloop.ooooomo.com${p}" />`).join('\n'),
     lang_links: langLinks(lang, (l, p) => PRIVACY[l] || p),

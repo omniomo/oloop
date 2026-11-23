@@ -249,7 +249,7 @@
   "Stop": "Arrêter",
   "Keep draft": "Garder le brouillon",
   "New draft": "Nouveau brouillon",
-  "oloop Publisher {version} diagnostics": "Diagnostic oloop Publisher {version}",
+  "Oloop {version} diagnostics": "Diagnostic Oloop {version}",
   "Platform: {platform}": "Plateforme : {platform}",
   "Status: {status} — {message}": "État : {status} — {message}",
   "Browser: {ua}": "Navigateur : {ua}"

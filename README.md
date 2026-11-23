@@ -2,7 +2,7 @@
   <img src="site/assets/logo.svg" width="88" alt="">
 </p>
 
-<h1 align="center">oloop</h1>
+<h1 align="center">Oloop</h1>
 
 <p align="center">
   Social media on autopilot.<br>
@@ -18,7 +18,7 @@
 
 <p align="center">X · Threads · Instagram · RedNote · TikTok · YouTube · Bilibili · Pinterest · note · Naver Blog</p>
 
-Write once in the side panel. oloop opens each platform's own composer in the browser you're signed into, uploads your media, fills everything in and waits until it's ready. X, Instagram and YouTube can post on their own; the others stop right before Post for you to press.
+Write once in the side panel. Oloop opens each platform's own composer in the browser you're signed into, uploads your media, fills everything in and waits until it's ready. X, Instagram and YouTube can post on their own; the others stop right before Post for you to press.
 
 ## Install
 

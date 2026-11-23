@@ -1,7 +1,7 @@
 {
  "en": {
-  "title": "oloop — Social media on autopilot",
-  "desc": "A free, open-source Chrome extension. Add media and text once; oloop opens X, Threads, Instagram, RedNote, TikTok, YouTube, Bilibili, Pinterest, note and Naver Blog side by side, in the browser you are already signed into.",
+  "title": "Oloop — Social media on autopilot",
+  "desc": "A free, open-source Chrome extension. Add media and text once; Oloop opens X, Threads, Instagram, RedNote, TikTok, YouTube, Bilibili, Pinterest, note and Naver Blog side by side, in the browser you are already signed into.",
   "fs": 69,
   "cta_github": "Get it on GitHub",
   "cta_store": "Add to Chrome",
@@ -27,7 +27,7 @@
    "title": "Posting",
    "rednote": "RedNote",
    "naver": "Naver Blog",
-   "aria": "oloop posting to ten platforms at once in the browser"
+   "aria": "Oloop posting to ten platforms at once in the browser"
   },
   "h1": [
    "Social media",
@@ -35,8 +35,8 @@
   ]
  },
  "zh-Hans": {
-  "title": "oloop — 社交媒体全自动发布",
-  "desc": "免费开源的 Chrome 插件。素材和文字只放一次，oloop 在你已登录的浏览器里同时打开 X、Threads、Instagram、小红书、TikTok、YouTube、B站、Pinterest、note 和 Naver 博客。",
+  "title": "Oloop — 社交媒体全自动发布",
+  "desc": "免费开源的 Chrome 插件。素材和文字只放一次，Oloop 在你已登录的浏览器里同时打开 X、Threads、Instagram、小红书、TikTok、YouTube、B站、Pinterest、note 和 Naver 博客。",
   "fs": 72,
   "cta_github": "在 GitHub 获取",
   "cta_store": "添加到 Chrome",
@@ -62,7 +62,7 @@
    "title": "发布中",
    "rednote": "小红书",
    "naver": "Naver 博客",
-   "aria": "oloop 在浏览器里同时向十个平台发布"
+   "aria": "Oloop 在浏览器里同时向十个平台发布"
   },
   "h1": [
    "社交媒体",
@@ -70,8 +70,8 @@
   ]
  },
  "zh-Hant": {
-  "title": "oloop — 社群媒體全自動發布",
-  "desc": "免費開源的 Chrome 擴充功能。素材和文字只放一次，oloop 在你已登入的瀏覽器裡同時開啟 X、Threads、Instagram、小紅書、TikTok、YouTube、Bilibili、Pinterest、note 和 Naver 部落格。",
+  "title": "Oloop — 社群媒體全自動發布",
+  "desc": "免費開源的 Chrome 擴充功能。素材和文字只放一次，Oloop 在你已登入的瀏覽器裡同時開啟 X、Threads、Instagram、小紅書、TikTok、YouTube、Bilibili、Pinterest、note 和 Naver 部落格。",
   "fs": 72,
   "cta_github": "在 GitHub 取得",
   "cta_store": "加到 Chrome",
@@ -97,7 +97,7 @@
    "title": "發布中",
    "rednote": "小紅書",
    "naver": "Naver 部落格",
-   "aria": "oloop 在瀏覽器裡同時向十個平台發布"
+   "aria": "Oloop 在瀏覽器裡同時向十個平台發布"
   },
   "h1": [
    "社群媒體",
@@ -105,7 +105,7 @@
   ]
  },
  "ja": {
-  "title": "oloop — SNS 投稿を、全自動で",
+  "title": "Oloop — SNS 投稿を、全自動で",
   "desc": "無料・オープンソースの Chrome 拡張機能。メディアとテキストを一度入れるだけで、ログイン済みのブラウザで X、Threads、Instagram、RedNote、TikTok、YouTube、Bilibili、Pinterest、note、NAVER ブログを並べて開きます。",
   "fs": 65,
   "cta_github": "GitHub で入手",
@@ -132,7 +132,7 @@
    "title": "投稿中",
    "rednote": "RedNote",
    "naver": "NAVER ブログ",
-   "aria": "oloop がブラウザで 10 のプラットフォームに同時投稿"
+   "aria": "Oloop がブラウザで 10 のプラットフォームに同時投稿"
   },
   "h1": [
    "SNS 投稿を、",
@@ -140,7 +140,7 @@
   ]
  },
  "ko": {
-  "title": "oloop — SNS 게시를 완전 자동으로",
+  "title": "Oloop — SNS 게시를 완전 자동으로",
   "desc": "무료 오픈소스 Chrome 확장 프로그램. 미디어와 글을 한 번만 넣으면 로그인된 브라우저에서 X, Threads, Instagram, 샤오홍슈, TikTok, YouTube, Bilibili, Pinterest, note, 네이버 블로그를 나란히 엽니다.",
   "fs": 71,
   "cta_github": "GitHub에서 받기",
@@ -167,7 +167,7 @@
    "title": "게시 중",
    "rednote": "샤오홍슈",
    "naver": "네이버 블로그",
-   "aria": "oloop가 브라우저에서 10개 플랫폼에 동시에 게시"
+   "aria": "Oloop가 브라우저에서 10개 플랫폼에 동시에 게시"
   },
   "h1": [
    "SNS 게시를",
@@ -175,8 +175,8 @@
   ]
  },
  "es": {
-  "title": "oloop — Redes sociales en piloto automático",
-  "desc": "Extensión de Chrome gratuita y de código abierto. Añade archivos y texto una vez; oloop abre X, Threads, Instagram, RedNote, TikTok, YouTube, Bilibili, Pinterest, note y Blog de Naver a la vez, en el navegador donde ya tienes la sesión iniciada.",
+  "title": "Oloop — Redes sociales en piloto automático",
+  "desc": "Extensión de Chrome gratuita y de código abierto. Añade archivos y texto una vez; Oloop abre X, Threads, Instagram, RedNote, TikTok, YouTube, Bilibili, Pinterest, note y Blog de Naver a la vez, en el navegador donde ya tienes la sesión iniciada.",
   "fs": 60,
   "cta_github": "Descárgala en GitHub",
   "cta_store": "Añadir a Chrome",
@@ -202,7 +202,7 @@
    "title": "Publicando",
    "rednote": "RedNote",
    "naver": "Blog de Naver",
-   "aria": "oloop publicando en diez plataformas a la vez"
+   "aria": "Oloop publicando en diez plataformas a la vez"
   },
   "h1": [
    "Redes sociales",
@@ -211,8 +211,8 @@
   ]
  },
  "fr": {
-  "title": "oloop — Réseaux sociaux en pilote automatique",
-  "desc": "Extension Chrome gratuite et open source. Ajoutez médias et texte une seule fois ; oloop ouvre X, Threads, Instagram, RedNote, TikTok, YouTube, Bilibili, Pinterest, note et Naver Blog côte à côte, dans le navigateur où vous êtes déjà connecté.",
+  "title": "Oloop — Réseaux sociaux en pilote automatique",
+  "desc": "Extension Chrome gratuite et open source. Ajoutez médias et texte une seule fois ; Oloop ouvre X, Threads, Instagram, RedNote, TikTok, YouTube, Bilibili, Pinterest, note et Naver Blog côte à côte, dans le navigateur où vous êtes déjà connecté.",
   "fs": 52,
   "cta_github": "Télécharger sur GitHub",
   "cta_store": "Ajouter à Chrome",
@@ -238,7 +238,7 @@
    "title": "Publication en cours",
    "rednote": "RedNote",
    "naver": "Blog Naver",
-   "aria": "oloop publie sur dix plateformes à la fois"
+   "aria": "Oloop publie sur dix plateformes à la fois"
   },
   "h1": [
    "Réseaux sociaux",
@@ -247,8 +247,8 @@
   ]
  },
  "de": {
-  "title": "oloop — Social Media auf Autopilot",
-  "desc": "Kostenlose Open-Source-Erweiterung für Chrome. Medien und Text nur einmal eingeben; oloop öffnet X, Threads, Instagram, RedNote, TikTok, YouTube, Bilibili, Pinterest, note und Naver Blog nebeneinander, im Browser, in dem du schon angemeldet bist.",
+  "title": "Oloop — Social Media auf Autopilot",
+  "desc": "Kostenlose Open-Source-Erweiterung für Chrome. Medien und Text nur einmal eingeben; Oloop öffnet X, Threads, Instagram, RedNote, TikTok, YouTube, Bilibili, Pinterest, note und Naver Blog nebeneinander, im Browser, in dem du schon angemeldet bist.",
   "fs": 68,
   "cta_github": "Auf GitHub holen",
   "cta_store": "Zu Chrome hinzufügen",
@@ -274,7 +274,7 @@
    "title": "Wird veröffentlicht",
    "rednote": "RedNote",
    "naver": "Naver Blog",
-   "aria": "oloop veröffentlicht gleichzeitig auf zehn Plattformen"
+   "aria": "Oloop veröffentlicht gleichzeitig auf zehn Plattformen"
   },
   "h1": [
    "Social Media",
@@ -282,8 +282,8 @@
   ]
  },
  "pt": {
-  "title": "oloop — Redes sociais no piloto automático",
-  "desc": "Extensão do Chrome gratuita e de código aberto. Adicione mídia e texto uma vez; o oloop abre X, Threads, Instagram, RedNote, TikTok, YouTube, Bilibili, Pinterest, note e Blog da Naver lado a lado, no navegador em que você já está conectado.",
+  "title": "Oloop — Redes sociais no piloto automático",
+  "desc": "Extensão do Chrome gratuita e de código aberto. Adicione mídia e texto uma vez; o Oloop abre X, Threads, Instagram, RedNote, TikTok, YouTube, Bilibili, Pinterest, note e Blog da Naver lado a lado, no navegador em que você já está conectado.",
   "fs": 65,
   "cta_github": "Baixar no GitHub",
   "cta_store": "Usar no Chrome",
@@ -309,7 +309,7 @@
    "title": "Publicando",
    "rednote": "RedNote",
    "naver": "Blog da Naver",
-   "aria": "oloop publicando em dez plataformas ao mesmo tempo"
+   "aria": "Oloop publicando em dez plataformas ao mesmo tempo"
   },
   "h1": [
    "Redes sociais",

@@ -1,6 +1,6 @@
 // Zip extension/ for the Chrome Web Store: manifest.json at the root of the zip.
 //
-//   node scripts/pack.mjs        ->  dist/oloop-publisher-<version>.zip
+//   node scripts/pack.mjs        ->  dist/oloop-<version>.zip
 //
 // No dependencies: a small deflate zip writer on top of node:zlib.
 import { readFileSync, readdirSync, statSync, mkdirSync, writeFileSync } from 'node:fs';
@@ -49,6 +49,6 @@ const end = Buffer.alloc(22);
 end.writeUInt32LE(0x06054b50, 0); end.writeUInt16LE(files.length, 8); end.writeUInt16LE(files.length, 10);
 end.writeUInt32LE(cenSize, 12); end.writeUInt32LE(offset, 16);
 mkdirSync(join(ROOT, 'dist'), { recursive: true });
-const out = join(ROOT, 'dist', `oloop-publisher-${version}.zip`);
+const out = join(ROOT, 'dist', `oloop-${version}.zip`);
 writeFileSync(out, Buffer.concat([...locals, ...centrals, end]));
 console.log(`${relative(ROOT, out)}  ${files.length} files`);

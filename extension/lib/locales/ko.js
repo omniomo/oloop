@@ -249,7 +249,7 @@
   "Stop": "중지",
   "Keep draft": "초안 남기기",
   "New draft": "새 초안",
-  "oloop Publisher {version} diagnostics": "oloop Publisher {version} 진단 정보",
+  "Oloop {version} diagnostics": "Oloop {version} 진단 정보",
   "Platform: {platform}": "플랫폼: {platform}",
   "Status: {status} — {message}": "상태: {status} — {message}",
   "Browser: {ua}": "브라우저: {ua}"

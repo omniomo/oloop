@@ -249,7 +249,7 @@
   "Stop": "停止",
   "Keep draft": "保留草稿",
   "New draft": "新建草稿",
-  "oloop Publisher {version} diagnostics": "oloop Publisher {version} 诊断信息",
+  "Oloop {version} diagnostics": "Oloop {version} 诊断信息",
   "Platform: {platform}": "平台：{platform}",
   "Status: {status} — {message}": "状态：{status} — {message}",
   "Browser: {ua}": "浏览器：{ua}"

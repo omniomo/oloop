@@ -47,7 +47,7 @@ const page = (lang, n) => {
     : `<div class="panel" style="right:120px"><img src="${shot(SHOT_NAMES[n])}"></div>`;
   const copyWidth = n === 4 ? 'width:430px' : '';
   return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><style>${css}</style></head><body><div class="frame">
-<div class="brand"><img src="${LOGO}">oloop</div>
+<div class="brand"><img src="${LOGO}">Oloop</div>
 <div class="copy" style="${copyWidth}">${n === 0 || n === 4 ? `<h1>${a}<br><span class="soft">${b}</span></h1>` : `<h1>${a}</h1><p>${b}</p>`}</div>
 ${panels}
 <span class="dot" style="left:96px;bottom:72px;background:#ef197c"></span><span class="dot" style="left:116px;bottom:72px;background:#fbb040"></span><span class="dot" style="left:136px;bottom:72px;background:#a2d159"></span>
@@ -74,7 +74,7 @@ for (const lang of Object.keys(H)) {
 const promo = (w, h, icon, word) => `<!doctype html><html><head><meta charset="utf-8"><style>${css}
 body{width:${w}px;height:${h}px;background:#fbb040}.c{width:${w}px;height:${h}px;display:flex;align-items:center;justify-content:center;gap:${Math.round(icon * 0.28)}px}
 .c img{width:${icon}px;height:${icon}px}.c b{font:600 ${word}px/0.9 var(--d);letter-spacing:-0.05em;color:#0a0a0b}</style></head>
-<body><div class="c"><img src="${LOGO}"><b>oloop</b></div></body></html>`;
+<body><div class="c"><img src="${LOGO}"><b>Oloop</b></div></body></html>`;
 for (const [name, w, h, icon, word, dir] of [['promo-small-440x280', 440, 280, 110, 68], ['promo-marquee-1400x560', 1400, 560, 220, 150], ['og', 1200, 630, 200, 136, join(ROOT, 'site/assets')]]) {
   await p.setViewportSize({ width: w, height: h });
   writeFileSync(tmp, promo(w, h, icon, word));

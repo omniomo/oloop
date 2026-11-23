@@ -119,7 +119,7 @@ function applyTheme() {
 function applyLang() {
   I18N.set(ui.lang);
   document.documentElement.lang = I18N.lang;
-  document.title = 'oloop';
+  document.title = 'Oloop';
 }
 function setLang(code) {
   ui.lang = code;
@@ -292,7 +292,7 @@ const runActive = () => !!run && run.jobs.some((j) => !TERMINAL.has(j.status));
 
 function header() {
   const menuBtn = h('button', { class: 'round', 'aria-label': t('More'), 'aria-haspopup': 'menu', onClick: (e) => toggleMenu(e.currentTarget) }, I.more());
-  return h('header', { class: 'top' }, h('div', { class: 'brand' }, mark(26), h('span', { class: 'brand-name', text: 'oloop' })), menuBtn);
+  return h('header', { class: 'top' }, h('div', { class: 'brand' }, mark(26), h('span', { class: 'brand-name', text: 'Oloop' })), menuBtn);
 }
 
 function viewSwitch() {
@@ -973,7 +973,7 @@ function buildRun() {
 
 async function copyDiagnostics(job, button) {
   const text = [
-    t('oloop Publisher {version} diagnostics', { version: chrome.runtime.getManifest().version }),
+    t('Oloop {version} diagnostics', { version: chrome.runtime.getManifest().version }),
     t('Platform: {platform}', { platform: PLATFORMS[job.platform].name }),
     t('Status: {status} — {message}', { status: STATUS[job.status]?.label || job.status, message: job.message || '' }),
     t('Browser: {ua}', { ua: navigator.userAgent }),

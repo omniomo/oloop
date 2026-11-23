@@ -62,7 +62,7 @@ if (run) {
     <div class="foot"><i style="width:64px;background:#efeee9"></i><span class="post"></span></div>
   </div></div>
   <div class="side">
-    <div class="ph"><img src="/assets/logo.svg" alt=""><b>oloop</b><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></div>
+    <div class="ph"><img src="/assets/logo.svg" alt=""><b>Oloop</b><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></div>
     <div class="pt"><b>${esc(L.title)}</b><span class="count"></span></div>
     <ol class="rows">${P.map((p) => `<li class="row q${p.wide ? ' wide' : ''}"><span class="rg">${ring(30, 13.5, true)}<span class="disc">${p.icon}</span><span class="badge"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></span><span class="txt"><b>${esc(p.name)}</b><span class="st"></span></span><span class="act"><span class="go">${esc(L.go)}</span><span class="open">${esc(L.open)}<svg viewBox="0 0 24 24"><path d="M8 16L16 8M9 8h7v7"/></svg></span><span class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></li>`).join('')}</ol>
   </div>

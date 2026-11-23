@@ -249,7 +249,7 @@
   "Stop": "停止",
   "Keep draft": "下書きを残す",
   "New draft": "新しい下書き",
-  "oloop Publisher {version} diagnostics": "oloop Publisher {version} 診断情報",
+  "Oloop {version} diagnostics": "Oloop {version} 診断情報",
   "Platform: {platform}": "プラットフォーム：{platform}",
   "Status: {status} — {message}": "状態：{status} — {message}",
   "Browser: {ua}": "ブラウザ：{ua}"

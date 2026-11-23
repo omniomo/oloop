@@ -249,7 +249,7 @@
   "Stop": "Detener",
   "Keep draft": "Conservar borrador",
   "New draft": "Nuevo borrador",
-  "oloop Publisher {version} diagnostics": "Diagnóstico de oloop Publisher {version}",
+  "Oloop {version} diagnostics": "Diagnóstico de Oloop {version}",
   "Platform: {platform}": "Plataforma: {platform}",
   "Status: {status} — {message}": "Estado: {status} — {message}",
   "Browser: {ua}": "Navegador: {ua}"

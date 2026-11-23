@@ -1,4 +1,4 @@
-// oloop Publisher — background service worker.
+// Oloop — background service worker.
 //
 // Owns the "run": one publish action fanned out to several platforms.
 // All platforms start at once, each in its own tab: pages load, media is read
