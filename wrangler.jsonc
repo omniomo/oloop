@@ -1,0 +1,12 @@
+// oloop.ooooomo.com: a static Worker, like the other OMO sites.
+// Connected to this repo with Workers Builds, every push to main redeploys; no build step,
+// the pages in site/ are committed already built (npm run site).
+{
+  "name": "oloop-site",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./site",
+    "html_handling": "auto-trailing-slash"
+  },
+  "routes": [{ "pattern": "oloop.ooooomo.com", "custom_domain": true }]
+}

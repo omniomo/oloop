@@ -1,0 +1,23 @@
+      <main>
+        <section class="hero">
+          <div class="hero-text">
+            <h1 style="--fs: {{fs}}px">{{h1_lines}}</h1>
+            <div class="hero-foot">
+              <ul class="plats" aria-label="{{platforms}}">
+{{platform_icons}}
+              </ul>
+              <a class="btn get" href="https://github.com/omniomo/oloop-publisher" data-store-label="{{cta_store}}" data-send-label="{{send}}" data-copied-label="{{copied}}">{{cta_github}}</a>
+            </div>
+          </div>
+          <div class="stage">
+            <div class="run" id="run" role="img" aria-label="{{run_aria}}"></div>
+          </div>
+          <script type="application/json" id="run-i18n">{{run_json}}</script>
+        </section>
+
+        <ul class="tiles">
+          <li><img src="/assets/shots/{{lang}}/pick.webp" width="400" height="860" alt="{{alt_pick}}" loading="lazy" /></li>
+          <li><img src="/assets/shots/{{lang}}/post.webp" width="400" height="860" alt="{{alt_post}}" loading="lazy" /></li>
+          <li class="dark"><img src="/assets/shots/{{lang}}/night.webp" width="400" height="860" alt="{{alt_night}}" loading="lazy" /></li>
+        </ul>
+      </main>

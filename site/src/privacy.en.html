@@ -1,0 +1,38 @@
+<h1>Privacy Policy</h1>
+        <p class="date">oloop Publisher (Chrome extension) · Effective November 22, 2026</p>
+        <p>In short: oloop Publisher has no servers and collects no data. What you put in stays in your own browser, and goes only to the platforms you choose, through their own compose pages, when you press Publish.</p>
+
+        <h2>What the extension handles</h2>
+        <ul>
+          <li><b>Your draft and settings</b>: title, body, per-platform settings, the images and videos you add, the cover, and your theme and language choice. Stored on your device in Chrome storage (<code>chrome.storage.local</code>) and IndexedDB until you clear the draft or remove the extension.</li>
+          <li><b>Publishing progress</b>: which platforms a run posts to, each one's status, and links to the published posts. Stored in <code>chrome.storage.session</code> and gone when the browser closes.</li>
+          <li><b>Pinterest board names</b>: read from Pinterest's own board picker and stored on your device, so settings can offer them as choices.</li>
+          <li><b>Compose page structure</b>: on the compose pages of the platforms you choose, the extension reads the page's buttons and fields to find where to fill in and what to press. It runs only on those compose pages; it does not read your feeds, messages or other pages, nor cookies or passwords.</li>
+          <li><b>Diagnostics</b>: when a step fails, the extension notes the names of the buttons and fields on the page at that moment (which may include the account name shown on the page and the start of your text). It is copied to your clipboard only when you press Copy diagnostics, and is never sent anywhere automatically.</li>
+        </ul>
+
+        <h2>Who receives data</h2>
+        <ul>
+          <li><b>The platforms you choose</b>: when you press Publish, the extension fills your draft into each platform's own compose page in the browser you're signed into. That is its only purpose. Each platform's own privacy policy applies to what you post.</li>
+          <li><b>No one else</b>: no servers of ours, no analytics, ads or third-party SDKs; no data is sold or transferred. The extension loads no remote code, and its fonts are bundled, so it makes no requests of its own.</li>
+        </ul>
+
+        <h2>Permissions</h2>
+        <ul>
+          <li><code>sidePanel</code>: shows the side panel.</li>
+          <li><code>storage</code>, <code>unlimitedStorage</code>: keeps your draft on your device; videos can be large.</li>
+          <li><code>alarms</code>: checks on a run while it publishes, so a stuck platform is retried or reported.</li>
+          <li>Runs on the compose pages of X, Threads, Instagram, Xiaohongshu, TikTok, YouTube, Bilibili, Pinterest, note and Naver Blog: uploads media, fills in text, waits for processing, presses send.</li>
+        </ul>
+
+        <h2>Deleting</h2>
+        <p>Side panel ··· → Clear draft deletes the draft, media and cover. Removing the extension deletes everything it stored.</p>
+
+        <h2>Children</h2>
+        <p>The extension is not directed at children under 13.</p>
+
+        <h2>Changes</h2>
+        <p>Changes to this policy are posted on this page with a new effective date. If how data is handled changes in a material way, the extension will tell you after the update.</p>
+
+        <h2>Contact</h2>
+        <p>Questions: open an issue on <a href="https://github.com/omniomo/oloop-publisher/issues">GitHub</a>.</p>

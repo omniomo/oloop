@@ -1,0 +1,245 @@
+{
+  "manifest_version": 3,
+  "name": "__MSG_name__",
+  "short_name": "oloop",
+  "version": "0.6.1",
+  "description": "__MSG_description__",
+  "default_locale": "en",
+  "homepage_url": "https://oloop.ooooomo.com",
+  "minimum_chrome_version": "116",
+  "action": {
+    "default_title": "__MSG_name__",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "side_panel": {
+    "default_path": "sidepanel/sidepanel.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": [
+    "sidePanel",
+    "storage",
+    "unlimitedStorage",
+    "alarms"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://x.com/*",
+        "https://twitter.com/*",
+        "https://www.threads.com/*",
+        "https://www.threads.net/*",
+        "https://www.instagram.com/*",
+        "https://www.tiktok.com/*",
+        "https://studio.youtube.com/*",
+        "https://*.pinterest.com/*",
+        "https://note.com/*",
+        "https://editor.note.com/*",
+        "https://blog.naver.com/*",
+        "https://creator.xiaohongshu.com/*",
+        "https://member.bilibili.com/*"
+      ],
+      "js": [
+        "content/picker.js"
+      ],
+      "world": "MAIN",
+      "run_at": "document_start",
+      "all_frames": true
+    },
+    {
+      "matches": [
+        "https://x.com/*",
+        "https://twitter.com/*"
+      ],
+      "js": [
+        "lib/i18n.js",
+        "lib/locales/zh-Hans.js",
+        "lib/locales/zh-Hant.js",
+        "lib/locales/ja.js",
+        "lib/locales/ko.js",
+        "lib/locales/es.js",
+        "lib/locales/fr.js",
+        "lib/locales/de.js",
+        "lib/locales/pt.js",
+        "content/core.js",
+        "content/x.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://www.threads.com/*",
+        "https://www.threads.net/*"
+      ],
+      "js": [
+        "lib/i18n.js",
+        "lib/locales/zh-Hans.js",
+        "lib/locales/zh-Hant.js",
+        "lib/locales/ja.js",
+        "lib/locales/ko.js",
+        "lib/locales/es.js",
+        "lib/locales/fr.js",
+        "lib/locales/de.js",
+        "lib/locales/pt.js",
+        "content/core.js",
+        "content/threads.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://www.instagram.com/*"
+      ],
+      "js": [
+        "lib/i18n.js",
+        "lib/locales/zh-Hans.js",
+        "lib/locales/zh-Hant.js",
+        "lib/locales/ja.js",
+        "lib/locales/ko.js",
+        "lib/locales/es.js",
+        "lib/locales/fr.js",
+        "lib/locales/de.js",
+        "lib/locales/pt.js",
+        "content/core.js",
+        "content/instagram.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://creator.xiaohongshu.com/*"
+      ],
+      "js": [
+        "lib/i18n.js",
+        "lib/locales/zh-Hans.js",
+        "lib/locales/zh-Hant.js",
+        "lib/locales/ja.js",
+        "lib/locales/ko.js",
+        "lib/locales/es.js",
+        "lib/locales/fr.js",
+        "lib/locales/de.js",
+        "lib/locales/pt.js",
+        "content/core.js",
+        "content/xiaohongshu.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://www.tiktok.com/*"
+      ],
+      "js": [
+        "lib/i18n.js",
+        "lib/locales/zh-Hans.js",
+        "lib/locales/zh-Hant.js",
+        "lib/locales/ja.js",
+        "lib/locales/ko.js",
+        "lib/locales/es.js",
+        "lib/locales/fr.js",
+        "lib/locales/de.js",
+        "lib/locales/pt.js",
+        "content/core.js",
+        "content/tiktok.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://studio.youtube.com/*"
+      ],
+      "js": [
+        "lib/i18n.js",
+        "lib/locales/zh-Hans.js",
+        "lib/locales/zh-Hant.js",
+        "lib/locales/ja.js",
+        "lib/locales/ko.js",
+        "lib/locales/es.js",
+        "lib/locales/fr.js",
+        "lib/locales/de.js",
+        "lib/locales/pt.js",
+        "content/core.js",
+        "content/youtube.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://member.bilibili.com/*"
+      ],
+      "js": [
+        "lib/i18n.js",
+        "lib/locales/zh-Hans.js",
+        "lib/locales/zh-Hant.js",
+        "lib/locales/ja.js",
+        "lib/locales/ko.js",
+        "lib/locales/es.js",
+        "lib/locales/fr.js",
+        "lib/locales/de.js",
+        "lib/locales/pt.js",
+        "content/core.js",
+        "content/bilibili.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://*.pinterest.com/*"
+      ],
+      "js": [
+        "lib/i18n.js",
+        "lib/locales/zh-Hans.js",
+        "lib/locales/zh-Hant.js",
+        "lib/locales/ja.js",
+        "lib/locales/ko.js",
+        "lib/locales/es.js",
+        "lib/locales/fr.js",
+        "lib/locales/de.js",
+        "lib/locales/pt.js",
+        "content/core.js",
+        "content/pinterest.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://note.com/*",
+        "https://editor.note.com/*"
+      ],
+      "js": [
+        "lib/i18n.js",
+        "lib/locales/zh-Hans.js",
+        "lib/locales/zh-Hant.js",
+        "lib/locales/ja.js",
+        "lib/locales/ko.js",
+        "lib/locales/es.js",
+        "lib/locales/fr.js",
+        "lib/locales/de.js",
+        "lib/locales/pt.js",
+        "content/core.js",
+        "content/note.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://blog.naver.com/*"
+      ],
+      "js": [
+        "lib/i18n.js",
+        "lib/locales/zh-Hans.js",
+        "lib/locales/zh-Hant.js",
+        "lib/locales/ja.js",
+        "lib/locales/ko.js",
+        "lib/locales/es.js",
+        "lib/locales/fr.js",
+        "lib/locales/de.js",
+        "lib/locales/pt.js",
+        "content/core.js",
+        "content/naver.js"
+      ]
+    }
+  ]
+}
