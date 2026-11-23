@@ -1,181 +1,38 @@
-# oloop Publisher
+<p align="center">
+  <img src="site/assets/logo.svg" width="88" alt="">
+</p>
 
-一个 Chrome 插件：素材、标题、正文只放一次，点「发布」，它**同时**打开 10 个平台的发帖页（X、Threads、Instagram、小红书、TikTok、YouTube、Bilibili、Pinterest、note、Naver 博客），把素材传上去、标题正文填好，**等平台把素材处理完、核对无误**，再替你点发送（或者停在最后一步等你点）。
+<h1 align="center">oloop</h1>
 
-不走任何平台 API，用的就是你浏览器里已经登录的账号和官方网页，所以个人账号也能用，不需要切成商家号或创作者号。
+<p align="center">
+  Social media on autopilot.<br>
+  A Chrome extension that posts one draft to ten platforms.<br>
+  <a href="https://oloop.ooooomo.com">oloop.ooooomo.com</a>
+</p>
 
-```
-侧边栏（草稿）──「发布」──▶ 后台：同时开 10 个标签页 ──▶ 各平台官方发帖页
-     ▲                                │                       │
-     └────── 实时状态 / 链接 / 诊断 ◀───┴──── 进度、结果 ◀────────┘
-```
+<p align="center">
+  <img src="site/assets/shots/en/write.webp" width="30%" alt="A draft in the side panel">
+  <img src="site/assets/shots/en/post.webp" width="30%" alt="Posting to every platform at once">
+  <img src="site/assets/shots/en/night.webp" width="30%" alt="Dark mode">
+</p>
 
-## 安装（1 分钟）
+<p align="center">X · Threads · Instagram · RedNote · TikTok · YouTube · Bilibili · Pinterest · note · Naver Blog</p>
 
-1. 打开 `chrome://extensions`，右上角打开「开发者模式」。
-2. 点「加载已解压的扩展程序」，选这个仓库里的 **`extension/`** 文件夹。
-3. 把 oloop 图标固定到工具栏。点它会打开右侧边栏。
-4. 确认这个 Chrome 已经登录了要发的平台。
+Write once in the side panel. oloop opens each platform's own composer in the browser you're signed into, uploads your media, fills everything in and waits until it's ready. X, Instagram and YouTube can post on their own; the others stop right before Post for you to press.
 
-改了代码以后，在 `chrome://extensions` 里点一下刷新按钮，再刷新平台页面。
+## Install
 
-## 支持这个项目
+Until it's on the Chrome Web Store: download this repo, open `chrome://extensions`, turn on Developer mode, choose **Load unpacked** and pick the `extension` folder.
 
-插件免费、开源，以后也是。觉得省了时间的话，可以请 OMO 喝杯咖啡：
+## Develop
 
-- [Ko-fi](https://ko-fi.com/aerisz)
-- [GitHub Sponsors](https://github.com/sponsors/omniomo)
-
-侧边栏右上角 ··· 里也有这两个链接。
-
-## 用法
-
-1. **素材**：拖进侧边栏、`Cmd+V` 粘贴截图，或者点 ＋。拖动缩略图调整顺序（就是发出去的顺序），角上的数字是序号。
-2. **封面**（有视频时出现）：点「封面」→ **选一帧**（拖胶片条，点「用这一帧」）/ 上传图片 / 平台默认。用于 YouTube 缩略图、TikTok / 小红书 / B站封面、Instagram Reels 封面、Pinterest 视频 Pin 的封面；note 用它做見出し画像。
-3. **标题**和**正文**分开写。标题只给有标题的平台用，选填的可以空着。
-4. **发到**：点平台图标选上。选中的平台右下角有个小按钮，点开是这个平台自己的设置：单独的标题 / 正文（不填就跟草稿一样），YouTube「面向儿童」（默认开）和可见性，Instagram 保持原始比例，Pinterest 的 board 和链接，以及这个平台**发哪几个素材**（点缩略图换进换出；YouTube、TikTok 选发哪个视频，Pinterest 选哪一张）。Pinterest 的 board 是**选择**，列表是插件从 Pinterest 自己的 board 选择器里读到的（第一次发 Pin 时读取）；插件只点名字完全一致的现有 board，**从不点「Create board」**。
-5. 草稿有问题时，底部会出现提示（比如「YouTube、note 需要标题」），点它直接打开对应平台的设置；有问题的平台图标上的小按钮会变成黄色。
-   素材超过平台上限、或者平台收不了某类素材时（比如「Pinterest 只发 1 个」「Naver 博客 不发视频」），也会有一个不挡发布的提示。上限：X、Instagram、Threads 各 20 个，Naver 20 张图，YouTube / TikTok 1 个视频，Pinterest 1 个。
-6. **自动发送**：关（默认）= 全部填好后停在发送前一步；开 = 处理完、核对通过就自动发送。
-7. 点「发布」。每个平台一行，圆环是进度：黄色 = 等你点发送（「切过去」直接跳到那个标签页），粉色 = 出错（可以「重试」或复制诊断），绿色勾 = 发出去了（「查看」打开帖子）。
-
-> **第一次用先关着自动发送**，每个平台走一遍，确认填得对。
-
-### 界面
-
-- **语言**：English、简体中文、繁體中文、日本語、한국어、Español、Français、Deutsch、Português，和 OMO 其他产品一致。默认跟浏览器语言，右上角 ··· →「语言」可以手动选，会记住。各平台的进度提示也跟着这个语言。
-- **日间 / 夜间**：右上角 ··· 里切换，默认日间，会记住。
-- **卡片 / 环形**：「发到」右边的开关。默认卡片；环形把 10 个平台排在 OMO 的 O 上，素材在中间，发布时圆环显示进度。
-- 平台图标来自 [Simple Icons](https://simpleicons.org)（CC0），品牌标志归各自所有者。
-
-### BETA 平台
-
-Threads、小红书、TikTok、Bilibili、Pinterest、note、Naver 博客 标着 **BETA**：这些平台的选择器还没对着真实页面核对过，所以**不管开关怎么设，都只填好、不自动发送**。如果某一步出错，那一行会有**复制诊断**按钮（复制图标），复制出来的是那一刻页面上按钮、输入框、上传入口的名字和属性（可能带上页面上显示的账号名和你填的文字开头，粘贴前可以先看一眼），贴给维护的人就能很快修好选择器。
-
-## 每个平台做了什么
-
-| 平台 | 打开 | 标题 | 用哪些素材 | 步骤 |
-|---|---|---|---|---|
-| X | `x.com/compose/post` | — | 最多 20 个 | 放素材 → 等预览 → 填文案 → 等上传完 → 核对 → 发送 → 读「已发送」里的链接 |
-| Threads · BETA | `threads.com` | — | 最多 20 个 | 打开发帖框 → 添加媒体 → 填文案 → 停在「发布」 |
-| Instagram | `instagram.com` | — | 最多 20 个 | 创建 → 帖子 → 选文件 → Reels 提示点确定 → **原始比例** → 下一步（单个视频时设 Reels 封面）→ 填说明 → 分享 |
-| TikTok · BETA | TikTok Studio 上传页 | — | 第一个视频 | 选视频 → 替换掉 TikTok 自动填的文件名 → 上传封面 → 等上传完 → 停在「发布」 |
-| YouTube | `youtube.com/upload` | 必填 | 第一个视频 | 选视频 → 标题 → 描述 → **缩略图** → **面向儿童（默认）** →（在详情页就核对标题和儿童选项，Studio 翻页后会卸掉这一页）→ 下一步 × 3 → 可见性 → 等上传走完 → 发布 → 读链接 |
-| Pinterest · BETA | pin-creation-tool | 选填 | 第一个素材 | 选文件 → 标题 → 描述 → 链接 →（视频）**Edit cover**：能上传就传封面图，否则把滑块拖到你选的那一帧 → 选 board → 停在「发布」 |
-| note · BETA | `note.com/notes/new` | 必填 | 封面或第一张图做見出し画像 | 标题 → 正文 → 見出し画像 → 停在「公開に進む」 |
-| Naver 博客 · BETA | 블로그 글쓰기 | 必填 | 图片（最多 20） | 关掉「继续写草稿？」→ 标题 → 正文 → 사진 → 停在「발행」 |
-| 小红书 · BETA | 创作服务平台 发布笔记 | 选填，20 字 | 图片（最多 18）**或**一个视频，看第一个素材是什么；可在设置里换 | 选「上传图文 / 上传视频」→ 放素材 → 标题 → 正文 → 视频封面 → 等上传完 → 停在「发布」 |
-| Bilibili · BETA | 创作中心 投稿 | 必填，80 字 | 第一个视频 | 放视频 → 标题（替换 B 站自动填的文件名）→ 自制 → 标签 → 简介 → 封面 → 等「上传完成」→ 停在「立即投稿」 |
-
-Bilibili 的**标签**：设置里可以填；不填就用正文里的 `#话题`。两样都没有时会提示，页面上会停在「加个标签，再点立即投稿」。
-
-**并行，但前台轮流用**：点发布后所有标签页一起打开、一起加载页面、一起读素材，上传也是同时进行的。但 Chrome 不渲染后台标签页（X 不生成素材预览、YouTube 的上传窗口出不来），所以「需要页面可见」的那几步要排队用前台：每个平台填表前先要前台，填完开始等上传就让给下一个；一个平台最多连续占 15 秒，后面有人在等就轮换。排队时那一行会写「排队等前台」。
-
-## 它怎么避免发错
-
-- **只动自己开的标签页**：内容脚本先问后台「这个标签页有没有我的任务」，没有就什么都不做。
-- **发送前核对**：文字是不是草稿里那段、素材数量、YouTube 的可见性和儿童选项。有一项对不上就不自动发，写明原因并附诊断。
-- **等真的传完**：X 等上传百分比消失；YouTube 等「正在上传 xx%」结束；TikTok 等发布按钮可点。
-- **跳转了也能接上**：页面中途重定向或刷新（比如 note、Naver 的写作页），新页面会重新接上任务、从头填。
-- **不碰账号**：不读密码、不登录、不存凭证。素材只存在这台电脑的插件 IndexedDB 里。
-- **不弹系统文件框**：很多「上传」按钮是临时造一个文件输入框再 `click()`。插件在页面里拦下这种没有真实点击的调用，把输入框留下来塞文件；你自己的真实点击完全不受影响。
-
-一次只发一条、用的是你自己的登录状态。但这仍然是在网页上自动操作，各平台条款对自动化都有限制，请只用在自己的账号上发自己的内容。
-
-## 网络慢、视频大、页面抽风时
-
-- **超时看进度，不看总时长**：上传时只要平台的进度（百分比、剩余时间）在动，就一直等；**停住**才计时。3 分钟不动会提示「网络可能比较慢，继续等」，不会直接放弃。
-- **按文件大小给时间**：依赖上传的步骤按「基础时间 + 文件大小 ÷ 150 KB/s」给预算（500 MB 大约 1 小时），而不是固定 60 秒。
-- **后台和断网时间不算**：标签页在后台、或者浏览器断网时，计时暂停。
-- **素材交付三次机会**：先塞进文件输入框；页面没反应就重新找一次输入框再塞（很多页面会重建它）；再不行就模拟拖放。只要页面已经开始处理（出现预览或进度条），就继续等，**绝不重复上传**。
-- **自动重试**：填表阶段出错，会重新加载页面从头再来，最多 3 次。会在服务器上留下草稿的平台（YouTube 选完视频、Pinterest 上传后、note / Naver 填了标题后），过了那个点就不再重试，免得多出一份草稿。点了发送之后也绝不重试。
-- **页面加载慢**：90 秒还没接上就重新加载；5 分钟没有任何动静（填表时插件每 40 秒报一次平安）就判定页面卡死，重试或报错。
-- **说人话的错误**：出错时先判断原因：没登录（跳到登录页、出现密码框）→ 直接说「还没登录」，不重试；平台自己弹了提示（比如「图片太小」）→ 原话引用，不做没用的重试；网络断了 → 说网络；一直在后台 → 说明；其余 → 提示可能改版，附「复制诊断」。
-
-## 已知限制
-
-- **还没在真实账号上跑过**。测试用的是按选择器搭的模拟页面，能证明整条链路通；真实页面上的选择器准不准，要第一次用的时候看（BETA 平台尤其如此）。
-- X：普通账号 280 字符（中文算 2 个），没做 thread。
-- Instagram：界面语言支持英 / 简 / 繁。多张比例不同的图按第一张的比例。
-- YouTube：自定义缩略图需要频道已验证手机号；没有入口时会提示并继续。
-- note、Naver：正文里不插图（note 只设見出し画像，Naver 的图片插在正文后面）；最后的发布设置页由你确认。
-- 上传完成前别关对应的标签页。
-
-## 平台改版了怎么修
-
-每个平台一个文件，选择器和按钮文字都在文件顶部（`SEL` / `L`）：`extension/content/<平台>.js`。共用的操作（等待、点击、塞文件、填文字、核对、发送、诊断）在 `extension/content/core.js`。拿到「复制诊断」的内容，对照改选择器，刷新插件即可。
-
-## 结构
-
-```
-extension/
-  manifest.json            MV3，无构建步骤
-  background.js            发布队列：并行开标签页、前台调度、看门狗、分块传素材
-  lib/platforms.js         平台定义（标题/正文/素材/封面规则、BETA、设置项）
-  lib/i18n.js, lib/t.js    翻译：键就是英文原文，t('Posted')；侧边栏、后台、内容脚本共用
-  lib/locales/<lang>.js    zh-Hans zh-Hant ja ko es fr de pt 的译文
-  _locales/                商店和 chrome://extensions 里的名字、简介（10 个语言目录）
-  fonts/                   Funnel Display / Funnel Sans（OFL），打包进插件，不请求 Google Fonts
-  lib/db.js                IndexedDB：素材和封面本体
-  lib/brands.js            平台图标（Simple Icons，CC0）
-  icons/                   插件图标：墨色圆角方块里一架带 OMO 眼睛的纸飞机（16px 版去掉眼睛）
-  sidepanel/               侧边栏（草稿、封面选帧、平台设置、实时状态、日夜主题、卡片/环形）
-  content/picker.js        页面环境脚本：拦下临时文件输入框
-  content/core.js          适配器共用工具
-  content/<platform>.js    10 个平台适配器
-test/
-  mocks.mjs, mocks2.mjs    10 个平台发帖页的模拟版
-  e2e.mjs                  端到端测试
-  resilience.mjs           网络慢、页面抽风、文件被拒、没登录、手动重试
-  ui.mjs                   侧边栏：主题、视图、语言、设置、选帧封面、发布内容、各种运行状态（附截图）
-  i18n.mjs                 每个 t('…') 在 8 个译文里都有，占位符一致；_locales 齐全
-scripts/
-  pack.mjs                 打包 dist/oloop-publisher-<版本>.zip（商店上传用）
-  shots.mjs                9 种语言的侧边栏截图
-  store-images.mjs         商店截图 1280×800（每种语言 5 张）和宣传图
-  build-site.mjs           生成 oloop.ooooomo.com（9 种语言，路径和 ooooomo.com 一样）
-store/listing.md           商店后台每一栏要填的内容（9 种语言的介绍、权限说明、隐私问卷）
-site/                      介绍页；site/src 是源文件，其余是生成的
-```
-
-几个设计点：
-
-- **素材怎么进到平台页面里**：扩展消息只能传 JSON。素材存在扩展的 IndexedDB，内容脚本按 8 MB 一块（base64）向后台要，拼回 `File`，再用 `DataTransfer` 塞进平台的文件输入框，和你在文件选择框里选是一样的。
-- **文字怎么填进富文本编辑器**：Draft.js（X、TikTok）、Lexical（Instagram、Threads）、ProseMirror（note）、SmartEditor（Naver）都不是普通 textarea。先模拟一次「粘贴」，编辑器自己处理；不行再退回 `execCommand('insertText')`。填完读回来核对。
-- **封面选帧**：在侧边栏里用 `<video>` 定位到那一帧，画到 canvas 上导出 JPEG，存成封面，再按平台上传。
-- **状态放在 `chrome.storage.session`**：service worker 随时可能被挂起，状态不能放内存。
-
-## 测试
-
-```bash
+```sh
 npm i -D playwright && npx playwright install chromium
-npm test              # 自动发送：非 BETA 平台自己发，BETA 平台由测试扮演你点发送
-npm run test:manual   # 只填不发：测试点所有发送按钮
-npm run test:resilience  # 网络慢 / 页面抽风 / 文件被拒 / 没登录 / 手动重试
-npm run test:ui       # 侧边栏本身（需要 ffmpeg 生成样片），截图在 $TMPDIR/oloop-ui
-npm run test:i18n     # 翻译齐不齐（不用浏览器）
-LOCALE=en-US npm test # 换一种浏览器语言再跑一遍（默认 zh-CN）
-HEADFUL=1 xvfb-run -a npm test   # Linux 上用真实的后台标签页（会真的被 Chrome 降速）跑一遍
+npm test
 ```
 
-### 加一句新文案 / 改翻译
+Each platform is one adapter in `extension/content/`. Translations are in `extension/lib/locales/`, the website in `site/`.
 
-代码里写英文原文：侧边栏和后台用 `t('Waiting for {platform}…', { platform })`，内容脚本用 `OL.t(...)`。然后在 `extension/lib/locales/` 每个文件里加同一个键的译文，`npm run test:i18n` 会指出缺了哪些。
+## License
 
-`test:resilience` 覆盖：进度在动时长时间等待不超时、进度停住会超时；页面第一次打开是坏的 → 自动重新加载后完成；文件输入框被页面重建、第一次塞的文件丢了 → 第二次接上；平台拒收文件 → 错误里引用平台原话且不重试；没登录 → 直接说没登录且不重试；点「重试」→ 用同一个标签页从头再来。
-
-测试把插件装进 Chrome，把 10 个平台的地址指向模拟页面，一起发一遍，检查每个页面收到的标题、正文、每个文件的字节（SHA-256）和顺序、封面、YouTube 的儿童选项和可见性、Pinterest 的 board 和链接，以及「上传没完成时绝不点发送」、note 跳转后能接上、Naver 在 iframe 里能填、临时文件输入框能被接住、小红书选对图文/视频且不碰侧边栏的「发布笔记」、B 站等到「上传完成」才能投稿。
-
-## 介绍页
-
-`site/` 是 oloop.ooooomo.com：改 `site/src` 后跑 `npm run site`，生成的页面一起提交。
-部署方式和其他 OMO 网站一样，是一个 Cloudflare Worker（`wrangler.jsonc`，名字 `oloop-site`），
-连上这个仓库后，推到 main 就会自动重新部署。商店上线后，把 `site/site.js` 里的 `STORE_URL` 填上。
-
-## 许可证
-
-[GPL-3.0](LICENSE)。字体 Funnel Display / Funnel Sans 用的是 [OFL](extension/fonts/OFL.txt)。
-
-## 和 oloop 的关系
-
-这是 oloop「Publish」那一环的执行层。以后 oloop 的 agent 产出的草稿（标题、正文、素材顺序、封面、平台变体）可以直接交给它发。
+[GPL-3.0](LICENSE)
