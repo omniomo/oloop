@@ -251,12 +251,11 @@ Oloop publishes one post to several social platforms at once: the user writes a 
 ## Test instructions (for the reviewer)
 
 ```
-No login is provided: the extension posts with the reviewer's own accounts on the platforms' own sites.
-1. Open the side panel from the toolbar icon.
-2. Add an image, type a title and text, pick X (or any platform you are signed in to).
-3. Leave "Auto-send" off and press Post. Oloop opens the compose page, attaches the image, fills the text and stops before sending ("Ready to send"). Press send yourself or close the tab.
-Platforms marked BETA in the code (all but X, Instagram and YouTube) never send automatically.
-The menu (···) switches language, theme, and clears the draft.
+No extension login is required. Sign in to X or another supported platform in Chrome.
+1. Open Oloop from the toolbar.
+2. Add an image and text, then select X or your platform.
+3. Leave Auto-send off and click Post. Oloop opens the compose page, adds the media and text, and shows Ready to send. You can close the tab without posting.
+Only X, Instagram and YouTube support Auto-send. The menu (···) changes language and theme or clears the draft.
 ```
 
 ## Before submitting
