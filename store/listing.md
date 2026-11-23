@@ -29,9 +29,10 @@ Screenshot folders: `en`, `zh-Hans` → zh_CN, `zh-Hant` → zh_TW, `ja`, `ko`, 
 ### Description — English (default)
 
 ```
-Write once. Post to ten platforms.
-
+Write once. Post to multi platforms.
 Oloop fills in each post with your text and media.
+
+Free and open source: https://github.com/omniomo/oloop
 ```
 
 ### Description — 简体中文 (zh_CN)
