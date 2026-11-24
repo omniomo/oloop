@@ -27,6 +27,7 @@
   "The description didn’t go in. Add it on the page.": "A descrição não foi preenchida. Adicione-a na página.",
   "Setting the cover…": "Definindo a capa…",
   "The cover wasn’t set, so {platform}’s default was used": "A capa não foi definida, então foi usada a padrão do {platform}",
+  "{platform} only takes a frame of the video as the cover, so its default was used": "O {platform} só aceita um quadro do vídeo como capa, então foi usada a padrão",
   "Waiting for {platform} to finish uploading…": "Aguardando o {platform} terminar o envio…",
   "{platform} to finish uploading and turn on {button}": "o {platform} terminar o envio e ativar “{button}”",
   "Add a tag, then press {button}": "Adicione uma tag e toque em “{button}”",

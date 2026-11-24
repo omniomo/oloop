@@ -129,25 +129,92 @@
     track.dispatchEvent(new MouseEvent('click', at));
   }
 
+  /** Press the timeline at x: Pinterest moves its frame window there on pointerdown. */
+  function pressAt(el, x) {
+    const r = el.getBoundingClientRect();
+    const at = { bubbles: true, cancelable: true, composed: true, clientX: x, clientY: r.top + r.height / 2, pointerId: 1, pointerType: 'mouse', isPrimary: true, button: 0, buttons: 1 };
+    const target = el.ownerDocument.elementFromPoint(x, at.clientY) || el;
+    target.dispatchEvent(new PointerEvent('pointerdown', at));
+    target.dispatchEvent(new MouseEvent('mousedown', at));
+    const up = { ...at, buttons: 0 };
+    target.dispatchEvent(new PointerEvent('pointerup', up));
+    target.dispatchEvent(new MouseEvent('mouseup', up));
+  }
+
   /**
-   * Video Pins: "Edit cover" opens a frame picker. Upload our cover image when the dialog
-   * offers it (exact frame); otherwise move its slider to the frame the user picked.
+   * "Pick a cover" (checked Nov 2026): a filmstrip with a frame-sized window over it; the
+   * frame under the window becomes the cover. Pressing the strip centres the window on
+   * the press, and the window's <video> seeks to that frame, so we press, read where it
+   * landed and correct.
+   */
+  async function pickOnTimeline(dlg, cover) {
+    const track = OL.$('[data-test-id*="timeline" i]', dlg);
+    if (!track || !(cover.time >= 0)) return false;
+    const video = () => OL.$('video', track) || OL.$('video', dlg);
+    // Its video tells us where the window landed once it has loaded.
+    const loaded = await OL.tryWaitFor(() => {
+      const v = video();
+      return v && v.readyState >= 1 && v.duration > 0 && Number.isFinite(v.duration) ? v : null;
+    }, { timeout: 8000 });
+    const duration = loaded?.duration || cover.duration || 0;
+    if (!duration) return false;
+    const r = track.getBoundingClientRect();
+    if (!r.width) return false;
+    const win = track.firstElementChild?.getBoundingClientRect().width || 0;
+    let x = r.left + (cover.time / duration) * r.width + win / 2;
+    for (let i = 0; i < 3; i++) {
+      pressAt(track, Math.min(r.right - 1, Math.max(r.left + 1, x)));
+      await OL.sleep(350);
+      const t = loaded ? video()?.currentTime : undefined;
+      if (!(t >= 0) || Math.abs(t - cover.time) < 0.1) break;
+      x += ((cover.time - t) / duration) * r.width;
+    }
+    return true;
+  }
+
+  /** Older picker: a range input or ARIA slider. */
+  async function pickOnSlider(dlg, cover) {
+    const slider = OL.$$('input[type="range"], [role="slider"]', dlg).find(OL.visible);
+    const video = OL.$('video', dlg);
+    const duration = cover.duration || video?.duration || 0;
+    if (!slider || !(cover.time >= 0) || !duration) return false;
+    setSlider(slider, cover.time / duration);
+    if (video) {
+      try { video.currentTime = cover.time; } catch {}
+    }
+    await OL.sleep(800);
+    return true;
+  }
+
+  /**
+   * Video Pins: "Edit cover" opens a frame picker. Pinterest only takes a frame of the
+   * video (no image upload), so a frame cover is matched; an uploaded image can't be.
+   * If a future picker offers an upload, the image goes in as is.
    */
   async function setCover(cover) {
-    const trigger =
-      OL.$$('[data-test-id*="cover" i] button, [data-test-id*="cover" i][role="button"], button[aria-label*="cover" i]').find(OL.visible) ||
-      OL.findClickable(L.editCover) ||
-      OL.findClickable(L.editCover, document, 'div, span');
+    const trigger = await OL.tryWaitFor(
+      () =>
+        OL.$$('[data-test-id$="edit-cover-button" i], [data-test-id*="cover" i] button, button[aria-label*="cover" i]').find((el) => OL.visible(el) && !OL.isDisabled(el)) ||
+        OL.findClickable(L.editCover) ||
+        OL.findClickable(L.editCover, document, 'div, span'),
+      { timeout: 20000 },
+    );
     if (!trigger) return false;
-    const before = new Set(OL.$$('[role="dialog"], [aria-modal="true"]'));
+    const before = new Set(OL.$$('[role="dialog"], [aria-modal="true"]').filter(OL.visible));
     OL.click(trigger);
     const dlg = await OL.tryWaitFor(
-      () => OL.$$('[role="dialog"], [aria-modal="true"]').find((d) => OL.visible(d) && (!before.has(d) || OL.$('input[type="range"], [role="slider"], video', d))),
+      () => OL.$$('[role="dialog"], [aria-modal="true"]').find((d) => OL.visible(d) && (!before.has(d) || OL.$('[data-test-id*="timeline" i], input[type="range"], [role="slider"], video', d))),
       { timeout: 8000 },
     );
     if (!dlg) return false;
     await OL.sleep(600);
+    const close = () => {
+      const cancel = OL.$('[data-test-id*="cancel" i]', dlg);
+      if (cancel) OL.click(cancel);
+      else closePicker();
+    };
 
+    let ok = false;
     let input = OL.$$('input[type="file"]', dlg).find((i) => /image/.test(i.accept || ''));
     if (!input) {
       const up = OL.findClickable(L.upload, dlg);
@@ -157,30 +224,24 @@
       const [file] = await OL.loadMedia([cover], OL.t('cover'));
       OL.setFiles(input, [file]);
       await OL.sleep(1500);
+      ok = true;
     } else {
-      const slider = OL.$$('input[type="range"], [role="slider"]', dlg).find(OL.visible);
-      const video = OL.$('video', dlg);
-      const duration = cover.duration || video?.duration || 0;
-      if (!slider || !(cover.time >= 0) || !duration) {
-        closePicker();
-        return false;
-      }
-      setSlider(slider, cover.time / duration);
-      if (video) {
-        try { video.currentTime = cover.time; } catch {}
-      }
-      await OL.sleep(800);
+      ok = (await pickOnTimeline(dlg, cover)) || (await pickOnSlider(dlg, cover));
+    }
+    if (!ok) {
+      close();
+      return false;
     }
     const done = await OL.tryWaitFor(() => {
-      const b = OL.findClickable(L.coverDone, dlg, 'button, [role="button"]');
+      const b = OL.$('[data-test-id*="done" i]', dlg) || OL.findClickable(L.coverDone, dlg, 'button, [role="button"]');
       return b && !OL.isDisabled(b) ? b : null;
     }, { timeout: 8000 });
     if (!done) {
-      closePicker();
+      close();
       return false;
     }
     OL.click(done);
-    await OL.sleep(800);
+    await OL.tryWaitFor(() => !dlg.isConnected || !OL.visible(dlg), { timeout: 4000 });
     return true;
   }
 
@@ -222,7 +283,12 @@
 
     if (cover && media.some((m) => /^video\//.test(m.type || ''))) {
       OL.report('filling', OL.t('Setting the cover…'));
-      if (!(await setCover(cover))) OL.note(OL.t('The cover wasn’t set, so {platform}’s default was used', { platform: 'Pinterest' }));
+      if (!(await setCover(cover)))
+        OL.note(
+          cover.time >= 0
+            ? OL.t('The cover wasn’t set, so {platform}’s default was used', { platform: 'Pinterest' })
+            : OL.t('{platform} only takes a frame of the video as the cover, so its default was used', { platform: 'Pinterest' }),
+        );
     }
 
     if (options.board) {

@@ -193,6 +193,24 @@ export function mediaFor(platformId, media, pick) {
   return list.slice(0, limit);
 }
 
+/**
+ * A title for a draft that only has text: its first line without links or
+ * trailing hashtags, cut to the platform's limit (at a word or punctuation
+ * break when one is near the end).
+ */
+export function titleFrom(text, limit = 100) {
+  const lines = (text || '').split('\n');
+  const clean = (l) => l.replace(/https?:\/\/\S+/g, '').replace(/[<>]/g, '').replace(/\s+/g, ' ').trim();
+  let line = lines.map((l) => clean(l.replace(/(\s*#[^\s#]+)+\s*$/, ''))).find(Boolean) || lines.map(clean).find(Boolean) || '';
+  const chars = [...line];
+  if (chars.length > limit) {
+    line = chars.slice(0, limit).join('');
+    const brk = Math.max(...[...line.matchAll(/[\s，。、,.!！?？;；:：]/g)].map((m) => [...line.slice(0, m.index)].length), -1);
+    if (brk >= limit * 0.6) line = [...line].slice(0, brk).join('');
+  }
+  return line.replace(/[\s，。、,;；:：]+$/, '').replace(/([^.])\.$/, '$1');
+}
+
 /** Hashtags written in a body: "#京都 #oloop" → ['京都', 'oloop']. */
 export function hashtags(text) {
   return [...new Set(((text || '').match(/#[^\s#]+/g) || []).map((t) => t.slice(1).replace(/[#，。,.!！?？]+$/, '')).filter(Boolean))];

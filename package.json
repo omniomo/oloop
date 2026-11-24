@@ -9,6 +9,7 @@
     "test:manual": "node test/e2e.mjs manual",
     "test:resilience": "node test/resilience.mjs",
     "test:ui": "node test/ui.mjs",
+    "test:covers": "node test/covers.mjs",
     "pack": "node scripts/pack.mjs",
     "test:i18n": "node test/i18n.mjs",
     "shots": "node scripts/shots.mjs",

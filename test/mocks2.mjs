@@ -31,28 +31,37 @@ $('post').onclick=async()=>{if($('post').getAttribute('aria-disabled')==='true')
   const t=document.createElement('div');t.innerHTML='<div><span>Posted</span> <a href="/@omniomo/post/ABC123">View</a></div>';document.body.appendChild(t)};
 </script></body></html>`;
 
+// TikTok Studio, shaped like the Nov 2026 page: the cover sits in
+// [data-e2e=cover_container]; "Edit cover" opens a full-screen editor whose
+// "Upload cover" label wraps a JPEG/PNG-only input, with Cancel/Save in its header.
+// A "Turn on automatic content checks?" modal pops up over everything first.
 export const TIKTOK_PAGE = `<!doctype html><html><head>${common}</head><body>
 <div id="up"><input type="file" accept="video/*" id="fi" style="display:none"><button>Select video</button></div>
 <div id="form" hidden>
   <div class="upload-progress" id="prog"></div>
   <div class="caption-editor"><div class="public-DraftEditor-content" contenteditable="true" id="cap" style="border:1px solid #ccc"></div></div>
-  <div><span>Cover</span><div role="button" id="editCover">Edit cover</div></div>
+  <div data-e2e="cover_container"><span>Cover</span>
+    <div class="cover-container" id="coverBox"><img id="coverImg" class="cover-image" width="60" height="80" alt=""><div class="edit-container">Edit cover</div></div></div>
   <button data-e2e="post_video_button" id="post" disabled>Post</button>
 </div>
-<div id="coverModal" role="dialog" hidden>
-  <div role="tab">Select cover</div><div role="tab" id="upTab">Upload cover</div>
-  <div id="upPane" hidden><input type="file" accept="image/png,image/jpeg" id="cfi" style="display:none"></div>
-  <button id="confirm" disabled>Confirm</button>
+<div role="dialog" class="TUXModal" id="checks" hidden>Turn on automatic content checks?<button id="checksNo">Cancel</button><button id="checksOn">Turn on</button></div>
+<div id="coverModal" role="dialog" class="Dialog__content" hidden>
+  <div><button id="cCancel">Cancel</button><button id="save">Save</button></div>
+  <div id="slot"></div>
 </div>
 <script>
-const $=id=>document.getElementById(id);let file=null,cover=null;
+const $=id=>document.getElementById(id);let file=null,cover=null,pending=null;
+const swatch=(c)=>{const k=document.createElement('canvas');k.width=6;k.height=8;const g=k.getContext('2d');g.fillStyle=c;g.fillRect(0,0,6,8);return k.toDataURL()};
+const upload=()=>{$('slot').innerHTML='<label role="button" aria-label="Upload cover image">Upload cover<input type="file" accept="image/jpeg, image/png, image/jpg" id="cfi" style="display:none"></label>';
+  $('cfi').onchange=e=>{const f=e.target.files[0];if(!/^image\\/(jpeg|png|jpg)$/.test(f.type)){__log.push('cover-rejected:'+f.type);return}
+    pending=f;$('slot').innerHTML='<div aria-label="Uploaded cover image"><button aria-label="Delete uploaded image" id="del">×</button></div>';$('del').onclick=()=>{pending=null;upload()}}};
 $('cap').addEventListener('paste',e=>{e.preventDefault();$('cap').innerText=e.clipboardData.getData('text/plain');__log.push('paste')});
-$('fi').onchange=e=>{file=e.target.files[0];$('up').hidden=true;$('form').hidden=false;$('cap').innerText=file.name.replace(/\\.\\w+$/,'');
+$('fi').onchange=e=>{file=e.target.files[0];$('up').hidden=true;$('form').hidden=false;$('cap').innerText=file.name.replace(/\\.\\w+$/,'');$('coverImg').src=swatch('#888');$('checks').hidden=false;
   let p=0;const iv=setInterval(()=>{p+=25;$('prog').textContent=p+'%';if(p>=100){clearInterval(iv);$('prog').textContent='Uploaded';$('post').disabled=false}},400)};
-$('editCover').onclick=()=>{$('coverModal').hidden=false};
-$('upTab').onclick=()=>{$('upPane').hidden=false};
-$('cfi').onchange=e=>{cover=e.target.files[0];$('confirm').disabled=false};
-$('confirm').onclick=()=>{$('coverModal').hidden=true;__log.push('cover-confirm')};
+$('checksOn').onclick=()=>__log.push('CHECKS-TURNED-ON');
+$('coverBox').onclick=()=>{upload();$('coverModal').hidden=false;__log.push('cover-open')};
+$('cCancel').onclick=()=>{$('coverModal').hidden=true;__log.push('cover-cancel')};
+$('save').onclick=()=>{if(pending){cover=pending;$('coverImg').src=URL.createObjectURL(pending)}$('coverModal').hidden=true;__log.push('cover-save')};
 $('post').onclick=async()=>{window.__posted={caption:$('cap').innerText,files:await describe([file]),cover:cover&&(await describe([cover]))[0]};
   history.pushState({},'','/tiktokstudio/content');$('form').hidden=true};
 </script></body></html>`;
@@ -68,25 +77,34 @@ export const PINTEREST_PAGE = `<!doctype html><html><head>${common}</head><body>
     <div data-test-id="board-row-Other" role="button">Other</div><div data-test-id="board-row-OMO" role="button" id="omo">OMO</div>
     <div role="button" id="createBoard">Create board</div></div>
   <div data-test-id="storyboard-creation-nav-done"><button id="pub" disabled>Publish</button></div>
-  <div data-test-id="pin-draft-cover" id="coverBox" hidden><button id="editCover">Edit cover</button></div>
+  <div data-test-id="storyboard-pin-card-item" id="coverBox" hidden><button data-test-id="video-cover-container-edit-cover-button" id="editCover"><div><div>Edit cover</div></div></button></div>
 </div>
-<div id="coverDlg" role="dialog" aria-modal="true" hidden><span>Cover</span>
-  <input type="range" id="frame" min="0" max="1000" value="0" aria-label="Choose a frame">
-  <button id="coverUp">Upload</button><button id="coverDone">Done</button></div>
+<div id="coverDlg" role="dialog" aria-modal="true" aria-label="Select a cover for the video" hidden><h1>Pick a cover</h1>
+  <div data-test-id="video-cover-edit-cover-modal-content" id="coverBody"></div>
+  <button data-test-id="video-cover-edit-cover-cancel-button" id="coverCancel">Cancel</button><button data-test-id="video-cover-edit-cover-done-button" id="coverDone">Done</button></div>
 <script>
 const $=id=>document.getElementById(id);let file=null,board=null;
-let coverFile=null,coverFrame=null;
-$('editCover').onclick=()=>{$('coverDlg').hidden=false;__log.push('cover-open')};
-$('coverUp').onclick=()=>pickFiles('image/*',false,fs=>{coverFile=fs[0];__log.push('cover-upload')});
-$('coverDone').onclick=()=>{coverFrame=Number($('frame').value);$('coverDlg').hidden=true;__log.push('cover-done')};
-$('storyboard-upload-input').onchange=e=>{file=e.target.files[0];if(file.type.startsWith('video/'))$('coverBox').hidden=false;
+// "Pick a cover" (Nov 2026): pressing the filmstrip centres a frame-sized window
+// on the press and seeks the window's video there; Done keeps that frame. No upload.
+// The strip is built when the picker opens (like the real one), so it holds no <video> before that.
+let coverTime=null,clipUrl=null;
+$('editCover').onclick=()=>{$('coverBody').innerHTML='<div data-test-id="video-cover-timeline-picker" id="track" style="position:relative;width:800px;height:120px;background:#ddd;cursor:pointer">'+
+    '<div id="win" style="position:absolute;left:0px;top:0;width:100px;height:120px;overflow:hidden;outline:2px solid #000"><video id="cv" muted style="width:100px;height:120px"></video></div></div>';
+  $('cv').src=clipUrl;
+  $('track').addEventListener('pointerdown',e=>{const r=$('track').getBoundingClientRect();const left=Math.min(700,Math.max(0,e.clientX-r.left-50));
+    $('win').style.left=left+'px';if($('cv').duration)$('cv').currentTime=left/800*$('cv').duration;__log.push('cover-press')});
+  $('coverDlg').hidden=false;__log.push('cover-open')};
+const closeCover=()=>{$('coverDlg').hidden=true;$('coverBody').innerHTML=''};
+$('coverDone').onclick=()=>{coverTime=$('cv').currentTime;closeCover();__log.push('cover-done')};
+$('coverCancel').onclick=()=>{closeCover();__log.push('cover-cancel')};
+$('storyboard-upload-input').onchange=e=>{file=e.target.files[0];if(file.type.startsWith('video/')){$('coverBox').hidden=false;clipUrl=URL.createObjectURL(file)}
   // locked while "processing", like the real form
   setTimeout(()=>{$('storyboard-selector-title').disabled=false;$('WebsiteField').disabled=false;$('desc').setAttribute('contenteditable','true');$('boardBtn').setAttribute('aria-disabled','false')},1500)};
 $('boardBtn').onclick=()=>{if($('boardBtn').getAttribute('aria-disabled')==='true')return;$('pop').hidden=false};
 document.addEventListener('keydown',e=>{if(e.key==='Escape')$('pop').hidden=true});
 $('createBoard').onclick=()=>{__log.push('CREATED-BOARD')};
 document.querySelectorAll('[data-test-id^=board-row-]').forEach(o=>o.onclick=()=>{board=o.textContent;$('boardBtn').textContent='Board '+board;$('pop').hidden=true;$('pub').disabled=false});
-$('pub').onclick=async()=>{window.__posted={title:$('storyboard-selector-title').value,description:$('desc').innerText,link:$('WebsiteField').value,board,files:await describe([file]),cover:coverFile&&(await describe([coverFile]))[0],coverFrame};
+$('pub').onclick=async()=>{window.__posted={title:$('storyboard-selector-title').value,description:$('desc').innerText,link:$('WebsiteField').value,board,files:await describe([file]),coverTime};
   const t=document.createElement('div');t.setAttribute('role','alert');t.innerHTML='Saved to '+board+' <a href="/pin/12345/">See it</a>';document.body.appendChild(t)};
 </script></body></html>`;
 

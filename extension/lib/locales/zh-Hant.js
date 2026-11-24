@@ -27,6 +27,7 @@
   "The description didn’t go in. Add it on the page.": "簡介沒有填入，請在頁面上補充",
   "Setting the cover…": "正在設定封面…",
   "The cover wasn’t set, so {platform}’s default was used": "封面沒有設定成功，已使用 {platform} 的預設封面",
+  "{platform} only takes a frame of the video as the cover, so its default was used": "{platform} 只能用影片中的一格畫面當封面，已使用預設封面",
   "Waiting for {platform} to finish uploading…": "等待 {platform} 上傳完成…",
   "{platform} to finish uploading and turn on {button}": "{platform} 上傳完成且「{button}」可點",
   "Add a tag, then press {button}": "請新增一個標籤，再點「{button}」",

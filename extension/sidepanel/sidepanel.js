@@ -1,5 +1,5 @@
 import { t, I18N } from '../lib/t.js';
-import { PLATFORMS, PLATFORM_ORDER, STATUS, TERMINAL, mediaFor, mediaAccepts, mediaLimit, hashtags, textLength } from '../lib/platforms.js';
+import { PLATFORMS, PLATFORM_ORDER, STATUS, TERMINAL, mediaFor, mediaAccepts, mediaLimit, hashtags, textLength, titleFrom } from '../lib/platforms.js';
 import { BRAND_PATHS } from '../lib/brands.js';
 import { SUPPORT } from '../lib/support.js';
 import { putMedia, getMedia, deleteMedia, clearMedia } from '../lib/db.js';
@@ -219,6 +219,18 @@ const coverMeta = () => ({
   ...(draft.cover.mode === 'frame' ? { time: draft.cover.time, duration: draft.cover.duration || 0 } : {}),
 });
 
+async function asJpeg(file) {
+  const bmp = await createImageBitmap(file);
+  const c = new OffscreenCanvas(bmp.width, bmp.height);
+  const g = c.getContext('2d');
+  g.fillStyle = '#fff';
+  g.fillRect(0, 0, c.width, c.height);
+  g.drawImage(bmp, 0, 0);
+  bmp.close();
+  const blob = await c.convertToBlob({ type: 'image/jpeg', quality: 0.92 });
+  return new File([blob], (file.name || 'cover').replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' });
+}
+
 async function storeCover(blob, name) {
   await putMedia({ id: COVER_ID, name, type: blob.type, size: blob.size, blob, addedAt: Date.now() });
   if (coverView) URL.revokeObjectURL(coverView.url);
@@ -227,9 +239,16 @@ async function storeCover(blob, name) {
 
 // ── draft analysis ─────────────────────────────────────────────────────────────
 
-const titleFor = (id) =>
-  PLATFORMS[id].title ? (draft.overrides[id].title.trim() ? draft.overrides[id].title : draft.title) : '';
-const textFor = (id) => (draft.overrides[id].text.trim() ? draft.overrides[id].text : draft.text);
+const orElse = (own, base) => (own.trim() ? own : base);
+const ownTitle = (id) => orElse(draft.overrides[id].title, draft.title);
+const ownText = (id) => orElse(draft.overrides[id].text, draft.text);
+// Either box left empty borrows from the other: the title from the text's
+// first line, the text from the title.
+const titleFor = (id) => {
+  const p = PLATFORMS[id].title;
+  return p ? orElse(ownTitle(id), titleFrom(ownText(id), p.limit)) : '';
+};
+const textFor = (id) => orElse(ownText(id), ownTitle(id));
 const selectedIds = () => PLATFORM_ORDER.filter((id) => draft.platforms[id]);
 
 function coverFor(id, used) {
@@ -740,8 +759,8 @@ function openPlatformSheet(id) {
   const p = PLATFORMS[id];
   openSheet(t('{platform} settings', { platform: p.name }), (sheet) => {
     const content = h('div', { class: 'group' });
-    if (p.title) content.append(overrideRow(id, 'title', t('Title'), draft.title, t('Same as draft')), h('div', { class: 'sep' }));
-    content.append(overrideRow(id, 'text', p.body.label || t('Text'), draft.text, t('Same as text')));
+    if (p.title) content.append(overrideRow(id, 'title', t('Title'), orElse(draft.title, titleFrom(ownText(id), p.title.limit)), t('Same as draft')), h('div', { class: 'sep' }));
+    content.append(overrideRow(id, 'text', p.body.label || t('Text'), orElse(draft.text, ownTitle(id)), t('Same as text')));
 
     const picker = p.media.max && orderedMedia().length ? mediaPicker(id) : null;
     const opts = (p.options || []).map((o) => optionControl(id, o));
@@ -852,9 +871,11 @@ function imagePicker() {
   show();
   const input = $('#cover-file');
   input.onchange = async (e) => {
-    const f = e.target.files[0];
+    let f = e.target.files[0];
     e.target.value = '';
     if (!f) return;
+    // TikTok, Bilibili and YouTube covers take JPEG or PNG only.
+    if (!/^image\/(jpeg|png)$/.test(f.type)) f = await asJpeg(f);
     await storeCover(f, f.name || 'cover.jpg');
     draft.cover = { mode: 'image', time: 0, videoId: null };
     save();

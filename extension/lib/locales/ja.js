@@ -27,6 +27,7 @@
   "The description didn’t go in. Add it on the page.": "説明文が入力されませんでした。ページ上で追加してください。",
   "Setting the cover…": "カバーを設定しています…",
   "The cover wasn’t set, so {platform}’s default was used": "カバーを設定できなかったため、{platform} の標準カバーを使用しました",
+  "{platform} only takes a frame of the video as the cover, so its default was used": "{platform} のカバーは動画のフレームからしか選べないため、標準カバーを使用しました",
   "Waiting for {platform} to finish uploading…": "{platform} のアップロード完了を待っています…",
   "{platform} to finish uploading and turn on {button}": "{platform} のアップロード完了と「{button}」の有効化",
   "Add a tag, then press {button}": "タグを追加してから「{button}」を押してください",

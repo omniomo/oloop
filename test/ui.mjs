@@ -97,14 +97,19 @@ await panel.dragAndDrop('#media-grid .thumb:nth-child(2)', '#media-grid .thumb:n
 const order = await panel.evaluate(() => chrome.storage.local.get('draft').then((r) => r.draft.mediaOrder.length));
 check('drag reorders media', (await panel.$eval('#media-grid .thumb:nth-child(1)', (n) => !!n.querySelector('video'))) && order === 3);
 
-// Problems show as chips: YouTube without a title.
+// Either box can stand in for the other: no title → the text's first line.
 await panel.fill('#title', '');
+await panel.waitForTimeout(100);
+check('text alone gives YouTube a title', !(await panel.isDisabled('#publish')) && !(await panel.$$eval('#issues .issue', (n) => n.some((x) => /标题/.test(x.textContent)))));
+// Problems show as chips: YouTube with neither.
+await panel.fill('#text', '');
 await panel.waitForTimeout(100);
 const chips = await panel.$$eval('#issues .issue', (n) => n.map((x) => x.textContent));
 check('missing title blocks publishing, grouped by problem', (await panel.isDisabled('#publish')) && chips.some((c) => /YouTube.*需要标题/.test(c)), JSON.stringify(chips));
 check('platform with a problem is marked', !!(await panel.$('.tile-wrap.has-issue [data-settings="youtube"]')));
 await shot('03-compose-issue-day');
 await panel.fill('#title', '京都，清晨的咖啡馆');
+await panel.fill('#text', '周末去了京都的咖啡馆，光线很好。\n\n#oloop #kyoto');
 
 // --- frame cover picker ---------------------------------------------------------
 await panel.click('#cover-row');
@@ -209,6 +214,22 @@ check('payload: X without the item left out', job('x').media.length === 2 && !jo
 check('payload: X keeps media order (clip first)', job('x').media[0].type.startsWith('video/'));
 check('payload: Instagram unaffected by other picks', job('instagram').media.length === 3);
 check('payload: 小红书 two images, no cover; Bilibili the video + cover', job('xiaohongshu').media.length === 2 && job('xiaohongshu').cover === null && job('bilibili').media[0].type.startsWith('video/') && job('bilibili').cover?.id === 'cover');
+
+// Title only: every platform's text falls back to it.
+await panel.fill('#text', '');
+await panel.click('#publish');
+const titleOnly = await panel.evaluate(() => window.__sent);
+const texts = Object.fromEntries(titleOnly.jobs.map((j) => [j.platform, j.payload.text]));
+check('title only: every text is the title (YouTube: its own)', Object.entries(texts).every(([id, s]) => s === (id === 'youtube' ? '京都 Vlog #1' : '京都，清晨的咖啡馆')), JSON.stringify(texts));
+// Text only: titles come from its first line, cut to each limit.
+await panel.fill('#title', '');
+await panel.fill('#text', '周末去了京都的咖啡馆，光线很好，咖啡也好喝，还有一只很亲人的猫。\n\n#oloop #kyoto');
+await panel.click('#publish');
+const textOnly = await panel.evaluate(() => window.__sent);
+const titles = Object.fromEntries(textOnly.jobs.map((j) => [j.platform, j.payload.title]));
+check('text only: titles from the first line', titles.xiaohongshu === '周末去了京都的咖啡馆，光线很好' && titles.bilibili === '周末去了京都的咖啡馆，光线很好，咖啡也好喝，还有一只很亲人的猫' && titles.youtube === '京都 Vlog #1' && titles.x === '', JSON.stringify(titles));
+await panel.fill('#title', '京都，清晨的咖啡馆');
+await panel.fill('#text', '周末去了京都的咖啡馆，光线很好。\n\n#oloop #kyoto');
 
 // --- loop view + night ---------------------------------------------------------
 await panel.click('.view-switch [data-view="loop"]');

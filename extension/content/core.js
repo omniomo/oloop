@@ -484,6 +484,19 @@
   OL.loadMedia = (list, label = OL.t('media')) =>
     OL.getFiles(list, (got, total) => OL.report('filling', OL.t('Reading {label} {pct}%', { label, pct: Math.round((got / total) * 100) })));
 
+  /** Re-encode an image as JPEG, for cover inputs that only take JPEG/PNG (a WebP cover, say). */
+  OL.toJpeg = async (file) => {
+    const bmp = await createImageBitmap(file);
+    const c = new OffscreenCanvas(bmp.width, bmp.height);
+    const g = c.getContext('2d');
+    g.fillStyle = '#fff';
+    g.fillRect(0, 0, c.width, c.height);
+    g.drawImage(bmp, 0, 0);
+    bmp.close();
+    const blob = await c.convertToBlob({ type: 'image/jpeg', quality: 0.92 });
+    return new File([blob], (file.name || 'cover').replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' });
+  };
+
   /**
    * The common ending of every adapter:
    *   wait until the platform is ready to send → check what we filled →

@@ -27,6 +27,7 @@
   "The description didn’t go in. Add it on the page.": "설명이 입력되지 않았습니다. 페이지에서 추가해 주세요.",
   "Setting the cover…": "커버 설정 중…",
   "The cover wasn’t set, so {platform}’s default was used": "커버를 설정하지 못해 {platform} 기본 커버를 사용했습니다",
+  "{platform} only takes a frame of the video as the cover, so its default was used": "{platform}은(는) 동영상의 한 장면만 커버로 쓸 수 있어 기본 커버를 사용했습니다",
   "Waiting for {platform} to finish uploading…": "{platform} 업로드 완료를 기다리는 중…",
   "{platform} to finish uploading and turn on {button}": "{platform} 업로드 완료 및 「{button}」 활성화",
   "Add a tag, then press {button}": "태그를 추가한 다음 「{button}」을 누르세요",

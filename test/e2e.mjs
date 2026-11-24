@@ -225,6 +225,7 @@ check('Threads: text + 3 files (input created on the fly)', norm(threads.text) =
 check('Instagram: caption, original ratio, 3 files', norm(ig.caption) === norm(TEXT) && ig.ratio === 'original' && shas(ig.files) === JSON.stringify([SHA_A, SHA_B, SHA_V]));
 check('TikTok: caption replaced the file name', norm(tiktok.caption) === norm(TEXT));
 check('TikTok: video bytes + uploaded cover', tiktok.files?.[0]?.sha === SHA_V && tiktok.cover?.sha === SHA_COVER);
+check('TikTok: cover saved in the editor; content checks left alone', !!got.tiktok.log?.includes('cover-save') && !got.tiktok.log?.includes('CHECKS-TURNED-ON'));
 if (MODE === 'auto') {
   const held = ['x', 'instagram', 'youtube'].filter((p) => clicked.has(p));
   check(`auto-send: X, Instagram, YouTube sent on their own${held.length ? ` (held: ${held.map((p) => `${p} — ${readyMessages[p]}`).join('; ')})` : ''}`, !held.length);
@@ -237,7 +238,8 @@ check('YouTube: video never went into the thumbnail input', !got.youtube.log?.in
 check('Pinterest: never touched "Create board"', !got.pinterest.log?.includes('CREATED-BOARD'));
 if (MODE === 'manual') {
   check('Pinterest: video Pin (picked), title, description, link, board', pin.title === TITLE && norm(pin.description) === norm(TEXT) && pin.link === LINK && pin.board === 'OMO' && pin.files?.[0]?.sha === SHA_V);
-  check('Pinterest: Edit cover → uploaded our cover → Done', pin.cover?.sha === SHA_COVER && !!got.pinterest.log?.includes('cover-done'));
+  // Pinterest covers are frames of the video; an uploaded image can't be used (test/covers.mjs picks a frame).
+  check('Pinterest: image cover → picker cancelled, noted', !!got.pinterest.log?.includes('cover-cancel') && pin.coverTime == null && /只能用视频里的一帧/.test(readyMessages.pinterest || ''));
 } else {
   check('Pinterest: title, description, link, board, first image', pin.title === TITLE && norm(pin.description) === norm(TEXT) && pin.link === LINK && pin.board === 'OMO' && pin.files?.[0]?.sha === SHA_A);
   check('Pinterest: no cover step for an image Pin', !got.pinterest.log?.includes('cover-open'));
@@ -260,7 +262,9 @@ check('Pinterest: board list read from the picker', JSON.stringify(boards) === J
 if (process.env.HEADFUL) console.log('X got files while hidden?', got.x.log?.includes('files-while-hidden') ? 'yes (bad)' : 'no — waited for the front');
 
 const run = await readRun();
-check('all ten finished as done, with no notes', run.jobs.length === 10 && run.jobs.every((j) => j.status === 'done' && !/注意|note:|\(nota|remarque|Hinweis|observação|참고|注意：/.test(j.message || '')));
+// The one expected note: Pinterest can't use an image cover on a video Pin (manual run).
+const noted = (j) => /注意|note:|\(nota|remarque|Hinweis|observação|참고|注意：/.test((j.message || '').replace(/[（(]注意：Pinterest 只能用视频里的一帧做封面，已使用默认封面[)）]/, ''));
+check('all ten finished as done, with no other notes', run.jobs.length === 10 && run.jobs.every((j) => j.status === 'done' && !noted(j)));
 for (const j of run.jobs) console.log(`  ${j.platform.padEnd(9)} ${j.status.padEnd(7)} ${j.url || ''} ${j.message || ''}`);
 
 await panel.bringToFront();

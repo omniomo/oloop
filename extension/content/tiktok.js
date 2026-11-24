@@ -9,12 +9,16 @@
     fileInput: 'input[type="file"][accept*="video"]',
     caption: ['.public-DraftEditor-content[contenteditable="true"]', 'div[contenteditable="true"][role="combobox"]', 'div[contenteditable="true"]'],
     post: 'button[data-e2e="post_video_button"]',
+    editCover: ['[data-e2e="cover_container"] .cover-container', '[data-e2e="cover_container"] [class*="edit-container"]'],
+    coverImage: '[data-e2e="cover_container"] img',
+    removeUploaded: '[aria-label="Delete uploaded image"], [aria-label*="delete" i][aria-label*="upload" i], [aria-label*="删除"], [aria-label*="刪除"]',
   };
   const L = {
     post: ['Post', '发布', '發佈', '發布'],
     editCover: ['Edit cover', '编辑封面', '編輯封面', 'Select cover', '选择封面', '選擇封面'],
-    uploadCover: ['Upload cover', '上传封面', '上傳封面', 'Upload image', '上传图片', '上傳圖片'],
-    confirm: ['Confirm', '确认', '確認', 'Save', '保存', 'Done', '完成'],
+    uploadCover: ['Upload cover', 'Upload cover image', '上传封面', '上傳封面', 'Upload image', '上传图片', '上傳圖片'],
+    confirm: ['Save', '保存', '儲存', 'Confirm', '确认', '確認', 'Done', '完成'],
+    cancel: ['Cancel', '取消'],
     posted: /(video|post) (has been|was) (posted|published|uploaded)|视频已发布|影片已發佈|已发布|已發佈|发布成功/i,
   };
 
@@ -35,32 +39,63 @@
       (el) => OL.visible(el) && el.children.length < 8 && /\d{1,3}\s*%/.test(OL.text(el)),
     );
 
+  /** The cover shown on the form; its src changes when a new cover is saved. */
+  const coverImage = () => OL.$(SEL.coverImage, doc());
+
+  /**
+   * "Edit cover" (checked Nov 2026) opens a full-screen editor: a frame strip, an
+   * "Upload cover" label wrapping an image input (JPEG/PNG only), and Cancel/Save in
+   * its header. We upload our cover (the chosen frame or image) into that input, wait
+   * for it to replace the frame, save, and count it only once the form's cover changed.
+   */
   async function setCover(cover) {
     const d = doc();
-    const edit = OL.findClickable(L.editCover, d) || OL.findClickable(L.editCover, d, 'div, span');
+    const edit = await OL.tryWaitFor(
+      () => OL.first(SEL.editCover, d) || OL.findClickable(L.editCover, d) || OL.findText(L.editCover, d),
+      { timeout: 20000 },
+    );
     if (!edit) return false;
+    const was = coverImage()?.src || '';
+    const before = new Set(OL.$$('[role="dialog"]', d).filter(OL.visible));
     OL.click(edit);
-    const tab = await OL.tryWaitFor(() => OL.findClickable(L.uploadCover, d) || OL.findClickable(L.uploadCover, d, 'div, span'), { timeout: 6000 });
-    if (!tab) return false;
-    OL.click(tab);
-    await OL.sleep(600);
-    let input = OL.$$('input[type="file"]', d).find((i) => /image/.test(i.accept || ''));
+    const imageInput = (root) => OL.$$('input[type="file"]', root).find((i) => /image/.test(i.accept || ''));
+    const removeUploaded = (root) => OL.$(SEL.removeUploaded, root);
+    const dlg = await OL.tryWaitFor(
+      () => OL.$$('[role="dialog"]', d).find((x) => !before.has(x) && OL.visible(x) && (imageInput(x) || removeUploaded(x))) || null,
+      { timeout: 10000 },
+    );
+    if (!dlg) return false;
+    const cancel = () => {
+      const b = OL.findClickable(L.cancel, dlg, 'button');
+      if (b) OL.click(b);
+    };
+    // A cover uploaded earlier hides the upload input until it's removed.
+    if (!imageInput(dlg)) OL.click(removeUploaded(dlg));
+    const input = await OL.tryWaitFor(() => imageInput(dlg), { timeout: 5000 });
     if (!input) {
-      const zone = OL.findClickable(L.uploadCover, d) || tab;
-      input = await OL.openFileInput(zone, { doc: d, accept: 'image' });
+      cancel();
+      return false;
     }
-    if (!input) return false;
-    const [file] = await OL.loadMedia([cover], OL.t('cover'));
+    let [file] = await OL.loadMedia([cover], OL.t('cover'));
+    if (input.accept && !input.accept.split(/\s*,\s*/).includes(file.type)) file = await OL.toJpeg(file);
     OL.setFiles(input, [file]);
-    await OL.sleep(2500);
-    const ok = await OL.tryWaitFor(() => {
-      const b = OL.findClickable(L.confirm, d, 'button');
+    // The upload label gives way to the image once TikTok has taken it.
+    const took = await OL.tryWaitFor(() => !OL.findClickable(L.uploadCover, dlg) || null, { timeout: 15000 });
+    if (!took) {
+      cancel();
+      return false;
+    }
+    await OL.sleep(800);
+    const save = await OL.tryWaitFor(() => {
+      const b = OL.findClickable(L.confirm, dlg, 'button');
       return b && !OL.isDisabled(b) ? b : null;
     }, { timeout: 15000 });
-    if (!ok) return false;
-    OL.click(ok);
-    await OL.sleep(800);
-    return true;
+    if (!save) {
+      cancel();
+      return false;
+    }
+    OL.click(save);
+    return !!(await OL.tryWaitFor(() => (!OL.visible(dlg) && (coverImage()?.src || '') !== was) || null, { timeout: 15000 }));
   }
 
   OL.register('tiktok', async (job) => {
