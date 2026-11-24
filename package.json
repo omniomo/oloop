@@ -1,6 +1,6 @@
 {
   "name": "oloop",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "private": true,
   "description": "Chrome extension: add media, title and text once; it opens 10 platforms side by side, fills each post, waits for uploads, then sends.",
   "type": "module",
