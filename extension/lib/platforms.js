@@ -108,6 +108,11 @@ export const PLATFORMS = {
     body: { limit: 2000, get label() { return t('Description'); } },
     media: { max: 1, video: true, required: true },
     cover: true,
+    // B站 shows two covers; either can be its own image, otherwise the video cover is cropped.
+    coverSlots: [
+      { key: '4x3', ratio: [4, 3], get label() { return t('Home feed'); } },
+      { key: '16x9', ratio: [16, 9], get label() { return t('Profile page'); } },
+    ],
     beta: true,
     tags: true, // needs at least one tag
     options: [

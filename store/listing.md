@@ -1,11 +1,11 @@
-# Chrome Web Store listing — Oloop 0.7.0
+# Chrome Web Store listing — Oloop 0.7.1
 
 Everything the developer dashboard asks for, in the order it asks. Copy each block into its field.
 Images are in `store/images/` (made by `scripts/shots.mjs` + `scripts/store-images.mjs`).
 
 ## Package
 
-- Upload: `dist/oloop-0.7.0.zip` (`npm run pack`).
+- Upload: `dist/oloop-0.7.1.zip` (`npm run pack`).
 - Languages come from `extension/_locales`: en (default), zh_CN, zh_TW, ja, ko, es, fr, de, pt_BR, pt_PT. The dashboard shows a listing tab for each one.
 
 ## Store listing tab

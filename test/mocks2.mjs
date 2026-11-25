@@ -191,35 +191,55 @@ $('pub').onclick=async()=>{if($('pub').disabled)return;
   history.pushState({},'','/publish/success');$('form').hidden=true;document.body.insertAdjacentHTML('beforeend','<div>发布成功</div>')};
 </script></body></html>`;
 
-// B站: upload pre-fills the title with the file name; tags with Enter; Quill
-// 简介; 「上传完成」 before 立即投稿 works.
+// B站, shaped like the Nov 2026 page: upload pre-fills the title with the file
+// name; required 创作声明 picker; tags with Enter; Quill 简介; 「上传完成」 before
+// 立即投稿 works. 「封面制作」 has a canvas per ratio (pressing one makes it the
+// upload's target), 双比例同步改动 to send an upload to both, and 完成.
 export const BILI_PAGE = `<!doctype html><html><head>${common}</head><body>
-<div class="upload-wrp" id="up"><div class="upload-btn"><input type="file" accept=".mp4,.flv,.mov,.mkv" id="fi" style="display:none"></div><span>上传视频</span></div>
+<div class="upload-wrp" id="up"><input type="file" accept=".mp4,.flv,.mov,.mkv,.webm" id="fi" style="display:none"><span>上传视频</span></div>
 <div id="form" hidden>
   <div class="file-list"><span id="st">上传中</span></div>
-  <div class="cover-main"><div class="cover-main-img"><div class="img"></div></div><span id="chg">更换封面</span></div>
-  <div class="video-title"><input type="text" maxlength="80" class="input-val" id="title"></div>
-  <div><span class="check-radio-v2-name" id="own">自制</span><span class="check-radio-v2-name">转载</span></div>
+  <div class="cover-main"><div class="cover-module cover-module-main"><div class="cover-slot" id="slot" style="width:142px;height:107px">
+    <div class="cover-empty"><div class="cover-empty-pill"><span class="add-text">添加封面</span></div></div></div></div></div>
+  <div class="video-title"><input type="text" maxlength="80" class="input-val" placeholder="请输入稿件标题" id="title"></div>
+  <div class="creation-statement-container"><div class="bcc-select"><input type="text" readonly placeholder="请选择符合您视频内容的创作声明" id="stmt"></div></div>
   <div class="tag-wrp"><div class="tag-pre-wrp" id="tagList"></div><input type="text" placeholder="按回车键Enter创建标签" id="tagIn"></div>
   <div class="desc-container"><div class="ql-editor" contenteditable="true" id="desc" style="min-height:40px;border:1px solid #ccc"></div></div>
   <div class="submit-container"><span class="submit-add" id="submit">立即投稿</span></div>
 </div>
-<div id="coverModal" hidden><div class="cover-select-header-tab"><span>封面截取</span><span id="upTab">上传封面</span></div>
-  <div class="bcc-upload-wrapper"><input type="file" accept="image/png, image/jpeg" id="cfi" style="display:none"></div>
-  <div class="cover-select-footer-pick"><button id="done">完成</button></div></div>
+<div class="cover-editor bcc-dialog__wrap" id="ed" hidden>
+  <div class="cover-editor-panel">
+    <div class="operation"><div class="sync ratio_4_3 sync-checkbox-wrapper"><span>双比例同步改动</span><label class="sync-checkbox bcc-checkbox"><input type="checkbox" id="sync"></label></div></div>
+    <div class="cover-editor-panel-canvas">
+      <div class="active" id="sec43"><div class="cover-editor-panel-canvas-title"><span class="text">首页推荐封面（4:3）</span></div>
+        <div class="cover-editor-panel-canvas-image editor_4_3" style="position:relative;width:420px;height:236px"><canvas class="lower-canvas" width="420" height="236"></canvas><canvas class="upper-canvas" width="420" height="236" style="position:absolute;left:0;top:0"></canvas></div></div>
+      <div class="inactive" id="sec169"><div class="cover-editor-panel-canvas-title"><span class="text">个人空间封面（16:9）</span></div>
+        <div class="cover-editor-panel-canvas-image editor_16_9" style="position:relative;width:420px;height:236px"><canvas class="lower-canvas" width="420" height="236"></canvas><canvas class="upper-canvas" width="420" height="236" style="position:absolute;left:0;top:0"></canvas></div></div>
+    </div>
+    <div class="cover-editor-panel-select"><div class="bcc-upload cover-upload"><div class="bcc-upload-wrapper"><span class="upload-text">上传封面</span><input type="file" accept="image/png, image/jpeg" id="cfi" style="display:none"></div></div></div>
+  </div>
+  <div class="cover-editor-button"><div class="button" id="cCancel">取消</div><div class="button submit" id="cDone">完成</div></div>
+</div>
 <script>
-const $=id=>document.getElementById(id);let file=null,cover=null,tags=[],own=false,uploaded=false;
+const $=id=>document.getElementById(id);let file=null,tags=[],uploaded=false,saved={c43:null,c169:null},work={},active='43';
+const paint=async(sec,f)=>{const c=$(sec).querySelector('.lower-canvas');const g=c.getContext('2d');if(!f){g.fillStyle='#c99';g.fillRect(0,0,c.width,c.height);return}
+  const b=await createImageBitmap(f);g.drawImage(b,0,0,c.width,c.height)};
 $('fi').onchange=e=>{file=e.target.files[0];$('up').hidden=true;$('form').hidden=false;$('title').value=file.name.replace(/\\.\\w+$/,'');
   let p=0;const iv=setInterval(()=>{p+=25;$('st').textContent='上传中 '+p+'%';if(p>=100){clearInterval(iv);$('st').textContent='上传完成';uploaded=true}},400)};
-$('own').onclick=()=>{own=true};
 $('tagIn').addEventListener('keydown',e=>{if(e.key!=='Enter')return;const v=$('tagIn').value.trim();if(v&&!tags.includes(v)){tags.push(v);
   const s=document.createElement('span');s.className='label-item-v2-container';s.textContent=v;$('tagList').appendChild(s)}$('tagIn').value=''});
 $('desc').addEventListener('paste',e=>{e.preventDefault();$('desc').innerText=e.clipboardData.getData('text/plain')});
-$('chg').onclick=()=>{$('coverModal').hidden=false};
-$('upTab').onclick=()=>{__log.push('cover-tab')};
-$('cfi').onchange=e=>{cover=e.target.files[0]};
-$('done').onclick=()=>{$('coverModal').hidden=true;__log.push('cover-done')};
+const setActive=k=>{active=k;$('sec43').className=k==='43'?'active':'inactive';$('sec169').className=k==='169'?'active':'inactive'};
+$('slot').onclick=async()=>{work={...saved};setActive('43');await paint('sec43',work.c43);await paint('sec169',work.c169);$('ed').hidden=false;__log.push('cover-open')};
+$('sec43').querySelector('.upper-canvas').addEventListener('mousedown',()=>setActive('43'));
+$('sec169').querySelector('.upper-canvas').addEventListener('mousedown',()=>setActive('169'));
+$('sync').onchange=()=>__log.push($('sync').checked?'sync-on':'sync-off');
+$('cfi').onchange=async e=>{const f=e.target.files[0];if(!/^image\\/(png|jpeg)$/.test(f.type)){__log.push('cover-rejected:'+f.type);return}
+  const to=$('sync').checked?['43','169']:[active];for(const k of to){work['c'+k]=f;await paint('sec'+k,f)}__log.push('cover-upload:'+to.join('+'))};
+$('cCancel').onclick=()=>{$('ed').hidden=true;__log.push('cover-cancel')};
+$('cDone').onclick=()=>{saved={...work};$('ed').hidden=true;$('slot').innerHTML='<div class="cover-img" style="width:142px;height:107px;background:#888"><span class="edit-text" style="display:none">封面设置</span></div>';__log.push('cover-done')};
 $('submit').onclick=async()=>{if(!uploaded){__log.push('SUBMIT-BEFORE-UPLOAD');return}
-  window.__posted={title:$('title').value,own,tags:[...tags],desc:$('desc').innerText,files:await describe([file]),cover:cover&&(await describe([cover]))[0]};
+  window.__posted={title:$('title').value,tags:[...tags],desc:$('desc').innerText,files:await describe([file]),
+    cover43:saved.c43&&(await describe([saved.c43]))[0],cover169:saved.c169&&(await describe([saved.c169]))[0]};
   $('form').hidden=true;document.body.insertAdjacentHTML('beforeend','<div>稿件投递成功</div>')};
 </script></body></html>`;

@@ -253,9 +253,10 @@ if (MODE === 'manual') {
   check('小红书: image post, title, body, 2 images in order', xhs.kind === 'image' && xhs.title === TITLE && norm(xhs.body) === norm(TEXT) && shas(xhs.files) === JSON.stringify([SHA_A, SHA_B]));
 }
 check('小红书: the visible tab, never the sidebar 「发布笔记」', !got.xiaohongshu.log?.includes('SIDEBAR-CLICKED') && got.xiaohongshu.log?.some((l) => l.startsWith('tab-')));
-check('Bilibili: title replaced the file name, 自制, tag from #话题', bili.title === TITLE && bili.own === true && JSON.stringify(bili.tags) === '["oloop"]');
-check('Bilibili: 简介, video bytes, uploaded cover (confirmed with 完成)', norm(bili.desc) === norm(TEXT) && bili.files?.[0]?.sha === SHA_V && bili.cover?.sha === SHA_COVER && got.bilibili.log?.includes('cover-done'));
+check('Bilibili: title replaced the file name, tag from #话题', bili.title === TITLE && JSON.stringify(bili.tags) === '["oloop"]');
+check('Bilibili: 简介, video bytes, one cover for both ratios (同步, 完成)', norm(bili.desc) === norm(TEXT) && bili.files?.[0]?.sha === SHA_V && bili.cover43?.sha === SHA_COVER && bili.cover169?.sha === SHA_COVER && !!got.bilibili.log?.includes('sync-on') && !!got.bilibili.log?.includes('cover-done'));
 check('Bilibili: never submitted before 上传完成', !got.bilibili.log?.includes('SUBMIT-BEFORE-UPLOAD'));
+check('Bilibili: ready message asks for 创作声明 (left to the user)', /创作声明/.test(readyMessages.bilibili || ''), readyMessages.bilibili);
 
 const boards = await panel.evaluate(() => chrome.storage.local.get('pinterestBoards').then((r) => r.pinterestBoards?.names));
 check('Pinterest: board list read from the picker', JSON.stringify(boards) === JSON.stringify(['Other', 'OMO']));

@@ -71,6 +71,7 @@ function defaultDraft() {
     options: {},
     mediaPick: {}, // platform id -> media ids chosen for that platform (absent = automatic)
     cover: { mode: 'auto', time: 0, videoId: null },
+    coverSlots: {}, // 'bilibili:4x3' -> { name } when that slot has its own image
     autoSend: false,
   };
   for (const id of PLATFORM_ORDER) {
@@ -84,6 +85,7 @@ function mergeDraft(saved) {
   for (const k of ['title', 'text', 'mediaOrder', 'autoSend']) if (saved[k] != null) d[k] = saved[k];
   Object.assign(d.platforms, saved.platforms);
   Object.assign(d.cover, saved.cover);
+  Object.assign(d.coverSlots, saved.coverSlots);
   Object.assign(d.mediaPick, saved.mediaPick);
   for (const id of PLATFORM_ORDER) {
     d.overrides[id] = { ...d.overrides[id], ...(saved.overrides || {})[id] };
@@ -96,6 +98,7 @@ let draft = defaultDraft();
 let ui = { theme: 'light', view: 'cards', lang: 'auto' };
 const media = new Map(); // id -> { id, name, type, size, url, duration }
 let coverView = null; // { name, type, size, url }
+const slotViews = new Map(); // 'bilibili:4x3' -> { name, type, size, url }
 let run = null;
 let boards = [];
 let dragId = null;
@@ -229,6 +232,33 @@ async function asJpeg(file) {
   bmp.close();
   const blob = await c.convertToBlob({ type: 'image/jpeg', quality: 0.92 });
   return new File([blob], (file.name || 'cover').replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' });
+}
+
+const slotId = (key) => `cover:${key}`;
+async function storeSlot(key, file) {
+  await putMedia({ id: slotId(key), name: file.name, type: file.type, size: file.size, blob: file, addedAt: Date.now() });
+  if (slotViews.has(key)) URL.revokeObjectURL(slotViews.get(key).url);
+  slotViews.set(key, { name: file.name, type: file.type, size: file.size, url: URL.createObjectURL(file) });
+  draft.coverSlots[key] = { name: file.name };
+  save();
+}
+async function dropSlot(key) {
+  await deleteMedia(slotId(key)).catch(() => {});
+  if (slotViews.has(key)) URL.revokeObjectURL(slotViews.get(key).url);
+  slotViews.delete(key);
+  delete draft.coverSlots[key];
+  save();
+}
+/** Covers a platform takes per aspect ratio; a slot without its own image is null. */
+function coversFor(id, used) {
+  const slots = PLATFORMS[id].coverSlots;
+  if (!slots || !used.some(isVideo)) return null;
+  const out = {};
+  for (const s of slots) {
+    const v = slotViews.get(`${id}:${s.key}`);
+    out[s.key] = v ? { id: slotId(`${id}:${s.key}`), name: v.name, type: v.type, size: v.size } : null;
+  }
+  return Object.values(out).some(Boolean) ? out : null;
 }
 
 async function storeCover(blob, name) {
@@ -555,7 +585,7 @@ async function publish() {
     const used = mediaFor(id, list, draft.mediaPick[id]);
     return {
       platform: id,
-      payload: { title: titleFor(id), text: textFor(id), media: used.map(meta), cover: coverFor(id, used), options: { ...draft.options[id] } },
+      payload: { title: titleFor(id), text: textFor(id), media: used.map(meta), cover: coverFor(id, used), covers: coversFor(id, used), options: { ...draft.options[id] } },
     };
   });
   $('#publish').disabled = true;
@@ -629,6 +659,8 @@ async function clearDraft() {
   media.clear();
   if (coverView) URL.revokeObjectURL(coverView.url);
   coverView = null;
+  for (const v of slotViews.values()) URL.revokeObjectURL(v.url);
+  slotViews.clear();
   await clearMedia();
   draft = { ...defaultDraft(), platforms: draft.platforms, options: draft.options, autoSend: draft.autoSend };
   await chrome.storage.local.set({ draft });
@@ -771,12 +803,51 @@ function openPlatformSheet(id) {
     const sends = mediaFor(id, orderedMedia(), draft.mediaPick[id]);
     if ((p.cover && sends.some(isVideo)) || (p.headerImage && (video || orderedMedia().length))) {
       const label = p.headerImage ? t('Header image') : id === 'youtube' ? t('Thumbnail') : t('Cover');
-      const face = coverActive() ? h('img', { src: coverView.url, alt: '' }) : video ? h('video', { src: video.url, muted: true }) : null;
-      coverRow = h('button', { class: 'row-btn', onClick: openCoverSheet },
-        h('span', { class: 'mini' }, face), h('span', { class: 'label', text: label }),
-        h('span', { class: 'val', text: coverActive() ? (draft.cover.mode === 'frame' ? fmtTime(draft.cover.time, true) : t('Image')) : t('Default') }), I.chevron());
+      const own = (p.coverSlots || []).filter((s) => slotViews.has(`${id}:${s.key}`));
+      const face = own.length ? h('img', { src: slotViews.get(`${id}:${own[0].key}`).url, alt: '' })
+        : coverActive() ? h('img', { src: coverView.url, alt: '' }) : video ? h('video', { src: video.url, muted: true }) : null;
+      const val = own.length ? own.map((s) => s.ratio.join(':')).join(' · ')
+        : coverActive() ? (draft.cover.mode === 'frame' ? fmtTime(draft.cover.time, true) : t('Image')) : t('Default');
+      coverRow = h('button', { class: 'row-btn', 'data-cover-row': id, onClick: () => (p.coverSlots ? openSlotsSheet(id) : openCoverSheet()) },
+        h('span', { class: 'mini' }, face), h('span', { class: 'label', text: label }), h('span', { class: 'val', text: val }), I.chevron());
     }
     sheet.append(...[h('div', { class: 'grabber' }), sheetHead(p.name, h('span', { class: 'glyph-disc' }, glyph(id, 22))), content, picker, optGroup, coverRow, done()].filter(Boolean));
+  });
+}
+
+/** One tile per aspect ratio, drawn at the same height; tap one to give it its own image. */
+function openSlotsSheet(id) {
+  const p = PLATFORMS[id];
+  const video = firstVideo();
+  openSheet(t('Cover'), (sheet) => {
+    const row = h('div', { class: 'slots' });
+    const draw = () => row.replaceChildren(...p.coverSlots.map((s) => {
+      const key = `${id}:${s.key}`;
+      const own = slotViews.get(key);
+      const face = own ? h('img', { src: own.url, alt: '' })
+        : coverActive() ? h('img', { src: coverView.url, alt: '' })
+        : video ? h('video', { src: video.url, muted: true, preload: 'metadata' }) : null;
+      const pick = () => {
+        const input = $('#cover-file');
+        input.onchange = async (e) => {
+          let f = e.target.files[0];
+          e.target.value = '';
+          if (!f) return;
+          if (!/^image\/(jpeg|png)$/.test(f.type)) f = await asJpeg(f);
+          await storeSlot(key, f);
+          draw();
+        };
+        input.click();
+      };
+      const ratio = s.ratio.join(':');
+      return h('div', { class: 'slot', style: { flex: `${s.ratio[0] / s.ratio[1]} 1 0` } },
+        h('button', { class: 'slot-face', 'data-slot': s.key, style: { aspectRatio: s.ratio.join(' / ') }, 'aria-label': `${s.label} ${ratio}`, onClick: pick },
+          face, h('span', { class: 'ratio', text: ratio })),
+        own ? h('button', { class: 'rm', 'aria-label': t('Same as video cover'), onClick: async () => { await dropSlot(key); draw(); } }, stroke('<path d="M6 6l12 12M18 6L6 18"/>', 11, 2.6)) : null,
+        h('div', { class: 'slot-cap' }, h('span', { class: 'k', text: s.label }), h('span', { class: 'v', text: own ? t('Image') : t('Same as video cover') })));
+    }));
+    draw();
+    sheet.append(h('div', { class: 'grabber' }), sheetHead(t('Cover')), row, done());
   });
 }
 
@@ -1051,6 +1122,11 @@ async function init() {
   draft.mediaOrder = alive;
   const cover = await getMedia(COVER_ID).catch(() => null);
   if (cover) coverView = { name: cover.name, type: cover.type, size: cover.size, url: URL.createObjectURL(cover.blob) };
+  for (const key of Object.keys(draft.coverSlots)) {
+    const rec = await getMedia(slotId(key)).catch(() => null);
+    if (rec) slotViews.set(key, { name: rec.name, type: rec.type, size: rec.size, url: URL.createObjectURL(rec.blob) });
+    else delete draft.coverSlots[key];
+  }
 
   $('#file-input').addEventListener('change', (e) => { addFiles(e.target.files); e.target.value = ''; });
   const flush = () => { clearTimeout(saveTimer); chrome.storage.local.set({ draft }); };
