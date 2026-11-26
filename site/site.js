@@ -1,13 +1,6 @@
-// Store link: set once the extension is live on the Chrome Web Store.
-const STORE_URL = '';
-
-// ── Get button: the store once it's live; on phones, send the page to a computer. ──
+// ── Get button: the Chrome Web Store; on phones, send the page to a computer instead. ──
 const mobile = navigator.userAgentData ? navigator.userAgentData.mobile : /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 for (const a of document.querySelectorAll('.get')) {
-  if (STORE_URL) {
-    a.href = STORE_URL;
-    a.textContent = a.dataset.storeLabel;
-  }
   if (mobile && a.dataset.sendLabel) {
     a.textContent = a.dataset.sendLabel;
     a.addEventListener('click', async (e) => {

@@ -21,7 +21,9 @@ Write once in the side panel. Oloop opens each platform's own composer in the br
 
 ## Install
 
-Download the `oloop-*.zip` package from the [latest release](https://github.com/omniomo/oloop/releases/latest) and unzip it. Open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked**, and choose the folder containing `manifest.json`.
+[Add Oloop from the Chrome Web Store](https://chromewebstore.google.com/detail/oloop/hnfnnjcelkiojgpmenmknmpejjgndhlc).
+
+Or download the `oloop-*.zip` package from the [latest release](https://github.com/omniomo/oloop/releases/latest) and unzip it. Open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked**, and choose the folder containing `manifest.json`.
 
 ## Develop
 
