@@ -74,7 +74,11 @@ const blues = () =>
 
 // --- empty, day by default ---------------------------------------------------
 check('day mode by default', (await panel.getAttribute('html', 'data-theme')) === 'light');
-check('cards view by default', (await panel.$$('.tile')).length === 10 && !(await panel.$('.stage')));
+check('cards view by default: eight platforms, the rest behind 更多', (await panel.$$('.tile')).length === 8 && !(await panel.$('.stage')) && (await panel.textContent('.more-pf')) === '更多' && !(await panel.$('.tile[data-platform="pinterest"]')));
+await settle();
+await shot('01a-folded-day');
+await panel.click('.more-pf');
+check('更多 opens all eleven', (await panel.$$('.tile')).length === 11 && (await panel.textContent('.more-pf')) === '收起');
 check('every platform shows its logo', (await panel.$$eval('.tile .disc svg path', (ps) => ps.filter((p) => p.getAttribute('d').length > 40).length)) === 10);
 check('a blank draft shows no problems yet', (await panel.$$('#issues .issue')).length === 0 && !(await panel.$('.has-issue')) && (await panel.isDisabled('#publish')));
 await settle();
@@ -89,6 +93,24 @@ for (const id of ['tiktok', 'youtube']) await panel.click(`.tile[data-platform="
 await panel.waitForFunction(() => document.querySelector('#media-grid .dur'));
 check('video duration badge', (await panel.textContent('#media-grid .dur')) === '0:04');
 check('publish counts the platforms', (await panel.textContent('#publish-count')) === '4' && !(await panel.isDisabled('#publish')));
+
+// 视频号 asks for its site on the tap; a refusal leaves it off.
+await panel.evaluate(() => {
+  window.__asked = [];
+  window.__allow = false;
+  chrome.permissions.request = async (p) => (window.__asked.push(p.origins.join(',')), window.__allow);
+});
+await panel.click('.tile[data-platform="channels"]');
+await panel.waitForTimeout(150);
+const refused = await panel.evaluate(() => ({ asked: window.__asked, on: document.querySelector('.tile[data-platform="channels"]').getAttribute('aria-pressed') }));
+await panel.evaluate(() => { window.__allow = true; });
+await panel.click('.tile[data-platform="channels"]');
+await panel.waitForTimeout(150);
+const allowed = await panel.evaluate(() => document.querySelector('.tile[data-platform="channels"]').getAttribute('aria-pressed'));
+check('视频号: asks for channels.weixin.qq.com on the tap; off if refused, on if allowed',
+  refused.asked[0] === 'https://channels.weixin.qq.com/*' && refused.on === 'false' && allowed === 'true', JSON.stringify({ refused, allowed }));
+await panel.click('.tile[data-platform="channels"]');
+await panel.waitForTimeout(100);
 await settle();
 await shot('02-compose-cards-day');
 
@@ -234,7 +256,11 @@ await panel.fill('#text', '周末去了京都的咖啡馆，光线很好。\n\n#
 // --- loop view + night ---------------------------------------------------------
 await panel.click('.view-switch [data-view="loop"]');
 await panel.waitForSelector('.stage .node');
-check('loop view: 10 nodes on the ring', (await panel.$$('.stage .node')).length === 10);
+check('loop view: 11 nodes on the ring', (await panel.$$('.stage .node')).length === 11);
+await panel.click('.more-pf');
+const folded = await panel.$$eval('.stage .node', (n) => n.map((x) => [x.dataset.platform, x.getAttribute('aria-pressed')]));
+check('收起: only folded platforms that are on stay out', folded.length >= 8 && folded.filter(([id]) => ['pinterest', 'note', 'naver'].includes(id)).every(([, on]) => on === 'true'), JSON.stringify(folded));
+await panel.click('.more-pf');
 await settle();
 await shot('07-compose-loop-day');
 check('no blue in day mode', (await blues()).length === 0, JSON.stringify((await blues()).slice(0, 5)));

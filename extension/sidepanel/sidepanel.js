@@ -1,5 +1,5 @@
 import { t, I18N } from '../lib/t.js';
-import { PLATFORMS, PLATFORM_ORDER, STATUS, TERMINAL, mediaFor, mediaAccepts, mediaLimit, hashtags, textLength, titleFrom } from '../lib/platforms.js';
+import { PLATFORMS, PLATFORM_ORDER, FOLDED, STATUS, TERMINAL, mediaFor, mediaAccepts, mediaLimit, hashtags, textLength, titleFrom } from '../lib/platforms.js';
 import { BRAND_PATHS } from '../lib/brands.js';
 import { SUPPORT } from '../lib/support.js';
 import { putMedia, getMedia, deleteMedia, clearMedia } from '../lib/db.js';
@@ -50,7 +50,13 @@ const I = {
 };
 // Wordmark logos (小红书) sit in a wide, short band of their 24×24 box: crop to it.
 const GLYPH_BOX = { xiaohongshu: [0, 7.2, 24, 9.6] };
+// No CC0 glyph for these; their name stands in.
+const GLYPH_WORD = { channels: '视频号' };
 const glyph = (id, size = 20) => {
+  if (GLYPH_WORD[id]) {
+    const w = Math.round(size * 1.45);
+    return svg(`<svg width="${w}" height="${Math.round((w * 12) / 30)}" viewBox="0 0 30 12" aria-hidden="true"><text x="15" y="10.2" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor">${GLYPH_WORD[id]}</text></svg>`);
+  }
   const box = GLYPH_BOX[id];
   const w = box ? Math.round(size * 1.45) : size;
   const h = box ? Math.round((w * box[3]) / box[2]) : size;
@@ -276,7 +282,18 @@ const ownText = (id) => orElse(draft.overrides[id].text, draft.text);
 // first line, the text from the title.
 const titleFor = (id) => {
   const p = PLATFORMS[id].title;
-  return p ? orElse(ownTitle(id), titleFrom(ownText(id), p.limit)) : '';
+  if (!p) return '';
+  const raw = orElse(ownTitle(id), titleFrom(ownText(id), p.limit));
+  return p.clean ? p.clean(raw) : raw;
+};
+/** What a field will carry, and how it counts against the platform's limit. */
+const fieldUse = (id, field) => {
+  const p = PLATFORMS[id];
+  if (field === 'title') {
+    const v = titleFor(id);
+    return { len: [...v].length, limit: p.title?.limit };
+  }
+  return { len: textLength(id, textFor(id)), limit: p.body.limit };
 };
 const textFor = (id) => orElse(ownText(id), ownTitle(id));
 const selectedIds = () => PLATFORM_ORDER.filter((id) => draft.platforms[id]);
@@ -305,6 +322,7 @@ function analyze() {
     if (p.media.required && !used.length) problems.push(p.media.video ? t('Needs a video') : t('Needs media'));
     if (p.title?.required && !title.trim()) problems.push(t('Needs a title'));
     if (p.title?.limit && [...title].length > p.title.limit) problems.push(t('Title over {n} characters', { n: p.title.limit }));
+    if (p.title?.min && !title && (ownTitle(id).trim() || text.trim())) warnings.push(t('No {field}: it takes {min}–{max} characters', { field: p.title.label, min: p.title.min, max: p.title.limit }));
     if (id === 'youtube' && /[<>]/.test(title)) problems.push(t('No < or > in the title'));
     if (p.body.required && !text.trim()) problems.push(t('Needs text'));
     if (!p.media.required && !p.body.required && !text.trim() && !used.length) problems.push(t('Nothing to post'));
@@ -383,11 +401,11 @@ function stagePoints(w, hgt, n) {
   return { pts, ring: { x: x0, y: y0, w: x1 - x0, h: y1 - y0, r } };
 }
 
-function stage(width, buildNodes, center) {
+function stage(width, buildNodes, center, n = PLATFORM_ORDER.length) {
   const hgt = Math.round(Math.min(width * 0.64, 260));
   const el = h('div', { class: 'stage', style: { height: `${hgt}px` } });
   const draw = (w) => {
-    const geo = stagePoints(w, hgt, PLATFORM_ORDER.length);
+    const geo = stagePoints(w, hgt, n);
     el.replaceChildren(
       svg(`<svg class="ring" width="${w}" height="${hgt}" viewBox="0 0 ${w} ${hgt}" aria-hidden="true"><rect x="${geo.ring.x}" y="${geo.ring.y}" width="${geo.ring.w}" height="${geo.ring.h}" rx="${geo.ring.r}" fill="none" stroke="var(--ring-line)" stroke-width="1.5"/></svg>`),
       ...center(w, hgt),
@@ -503,29 +521,53 @@ function renderMedia() {
   slot.replaceChildren(h('section', { class: 'card media', 'aria-label': t('Media') }, grid, coverRow));
 }
 
+// Folded platforms that showed this session stay put, so turning one off doesn't make it vanish.
+const keepShown = new Set();
+function shownIds() {
+  const ids = PLATFORM_ORDER.filter((id) => !FOLDED.includes(id) || ui.allPlatforms || draft.platforms[id] || keepShown.has(id));
+  for (const id of ids) if (FOLDED.includes(id)) keepShown.add(id);
+  return ids;
+}
+function foldToggle(shown) {
+  const hidden = PLATFORM_ORDER.length - shown.length;
+  if (!hidden && !ui.allPlatforms) return null;
+  const open = !!ui.allPlatforms;
+  return h('button', {
+    class: 'more-pf',
+    'aria-expanded': String(open),
+    onClick: () => {
+      ui.allPlatforms = !open;
+      if (open) keepShown.clear();
+      saveUi();
+      renderPlatforms();
+    },
+  }, h('span', { text: open ? t('Show fewer') : t('More') }), I.chevron());
+}
+
 function renderPlatforms() {
   const slot = $('#pf-slot');
   if (!slot) return;
   const info = analyze();
+  const shown = shownIds();
   if (ui.view === 'loop') {
     const width = slot.clientWidth || 352;
-    slot.replaceChildren(stage(width, (pts) => PLATFORM_ORDER.map((id, i) => {
+    slot.replaceChildren(stage(width, (pts) => shown.map((id, i) => {
       const [x, y] = pts[i];
       const on = !!draft.platforms[id];
       const issue = hasIssue(id, info);
       return h('div', { class: `node-wrap${issue ? ' has-issue' : ''}`, style: { left: `${x}px`, top: `${y}px` } },
         h('button', { class: 'node', 'data-platform': id, 'aria-label': PLATFORMS[id].name, 'aria-pressed': String(on), onClick: () => togglePlatform(id) }, glyph(id, 20)),
         on ? h('button', { class: 'adjust', 'data-settings': id, 'aria-label': t('{platform} settings', { platform: PLATFORMS[id].name }), onClick: () => openPlatformSheet(id) }, I.sliders()) : null);
-    }), (w, hgt) => [centerStack(w, hgt)]));
+    }), (w, hgt) => [centerStack(w, hgt)], shown.length), foldToggle(shown) || '');
   } else {
-    slot.replaceChildren(h('div', { class: 'tiles' }, PLATFORM_ORDER.map((id) => {
+    slot.replaceChildren(h('div', { class: 'tiles' }, shown.map((id) => {
       const on = !!draft.platforms[id];
       const issue = hasIssue(id, info);
       return h('div', { class: `tile-wrap${issue ? ' has-issue' : ''}` },
         h('button', { class: 'tile', 'data-platform': id, 'aria-pressed': String(on), onClick: () => togglePlatform(id) },
           h('span', { class: 'disc' }, glyph(id, 20)), h('span', { class: 'tile-name', text: PLATFORMS[id].name })),
         on ? h('button', { class: 'adjust', 'data-settings': id, 'aria-label': t('{platform} settings', { platform: PLATFORMS[id].name }), onClick: () => openPlatformSheet(id) }, I.sliders()) : null);
-    })));
+    })), foldToggle(shown) || '');
   }
 }
 
@@ -541,8 +583,25 @@ function centerStack(w, hgt) {
     firstVideo() ? h('span', { class: 'chip' }, I.play(9), coverActive() && draft.cover.mode === 'frame' ? fmtTime(draft.cover.time, true) : t('Cover')) : null);
 }
 
-function togglePlatform(id) {
-  draft.platforms[id] = !draft.platforms[id];
+/** Turn off platforms whose site access was taken away in chrome://extensions. */
+async function dropRevoked() {
+  let changed = false;
+  for (const id of PLATFORM_ORDER) {
+    const access = PLATFORMS[id].access;
+    if (draft.platforms[id] && access && !(await chrome.permissions.contains({ origins: access }).catch(() => false))) {
+      draft.platforms[id] = false;
+      changed = true;
+    }
+  }
+  return changed;
+}
+
+async function togglePlatform(id) {
+  const on = !draft.platforms[id];
+  const access = PLATFORMS[id].access;
+  // Asked on the tap itself: Chrome only shows the prompt for a user gesture.
+  if (on && access && !(await chrome.permissions.request({ origins: access }).catch(() => false))) return;
+  draft.platforms[id] = on;
   save();
   renderPlatforms();
   updateCompose();
@@ -692,12 +751,22 @@ function overrideRow(id, field, label, base, followLabel) {
   input.placeholder = (base || '').split('\n').find(Boolean) || label;
   const follow = h('span', { class: 'follow', text: followLabel });
   follow.hidden = !!input.value.trim();
+  // How much of the platform's limit this field uses, as it will be sent.
+  const count = h('span', { class: 'count', 'data-count': field });
+  const tally = () => {
+    const { len, limit } = fieldUse(id, field);
+    count.hidden = !limit;
+    count.textContent = limit ? `${len} / ${limit}` : '';
+    count.classList.toggle('over', !!limit && len > limit);
+  };
+  tally();
   input.addEventListener('input', () => {
     draft.overrides[id][field] = input.value;
     follow.hidden = !!input.value.trim();
+    tally();
     save();
   });
-  return h('label', { class: 'field-row' }, h('span', { class: 'k', text: label }), input, follow);
+  return h('label', { class: 'field-row' }, h('span', { class: 'k', text: label }), input, follow, count);
 }
 
 function optionControl(id, o) {
@@ -791,7 +860,7 @@ function openPlatformSheet(id) {
   const p = PLATFORMS[id];
   openSheet(t('{platform} settings', { platform: p.name }), (sheet) => {
     const content = h('div', { class: 'group' });
-    if (p.title) content.append(overrideRow(id, 'title', t('Title'), orElse(draft.title, titleFrom(ownText(id), p.title.limit)), t('Same as draft')), h('div', { class: 'sep' }));
+    if (p.title) content.append(overrideRow(id, 'title', p.title.label || t('Title'), titleFor(id) || orElse(draft.title, titleFrom(ownText(id), p.title.limit)), t('Same as draft')), h('div', { class: 'sep' }));
     content.append(overrideRow(id, 'text', p.body.label || t('Text'), orElse(draft.text, ownTitle(id)), t('Same as text')));
 
     const picker = p.media.max && orderedMedia().length ? mediaPicker(id) : null;
@@ -1127,6 +1196,14 @@ async function init() {
     if (rec) slotViews.set(key, { name: rec.name, type: rec.type, size: rec.size, url: URL.createObjectURL(rec.blob) });
     else delete draft.coverSlots[key];
   }
+  await dropRevoked();
+  chrome.permissions.onRemoved?.addListener(async () => {
+    if (await dropRevoked()) {
+      save();
+      renderPlatforms();
+      updateCompose();
+    }
+  });
 
   $('#file-input').addEventListener('change', (e) => { addFiles(e.target.files); e.target.value = ''; });
   const flush = () => { clearTimeout(saveTimer); chrome.storage.local.set({ draft }); };

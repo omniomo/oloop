@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "__MSG_name__",
   "short_name": "Oloop",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "__MSG_description__",
   "default_locale": "en",
   "homepage_url": "https://oloop.ooooomo.com",
@@ -32,7 +32,11 @@
     "sidePanel",
     "storage",
     "unlimitedStorage",
-    "alarms"
+    "alarms",
+    "scripting"
+  ],
+  "optional_host_permissions": [
+    "https://channels.weixin.qq.com/*"
   ],
   "content_scripts": [
     {

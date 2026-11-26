@@ -291,6 +291,29 @@
     input.dispatchEvent(new win.Event('change', { bubbles: true }));
   };
 
+  /**
+   * Set files from the page's own world, through picker.js, for pages that check
+   * `instanceof File` against the window their scripts run in. True once it's done.
+   */
+  OL.setFilesInPage = (input, files, { timeout = 3000 } = {}) => {
+    const mark = Math.random().toString(36).slice(2);
+    input.setAttribute('data-oloop-mark', mark);
+    return new Promise((resolve) => {
+      const done = (ok) => {
+        window.removeEventListener('message', on);
+        clearTimeout(timer);
+        input.removeAttribute('data-oloop-mark');
+        resolve(ok);
+      };
+      const on = (e) => {
+        if (e.source === window && e.data?.type === 'oloop:set-files:done' && e.data.mark === mark) done(!!e.data.ok);
+      };
+      const timer = setTimeout(() => done(false), timeout);
+      window.addEventListener('message', on);
+      window.postMessage({ type: 'oloop:set-files', mark, files }, '*');
+    });
+  };
+
   /** Fallback for drop zones without a reachable file input. */
   OL.dropFiles = (target, files) => {
     const win = target.ownerDocument.defaultView || window;
@@ -413,11 +436,14 @@
       }
       return '  ' + parts.join(' ');
     };
-    const dialogs = OL.$$('[role=dialog], [aria-modal=true], tp-yt-paper-dialog', doc).filter(OL.visible);
+    // Micro-apps (视频号's wujie) keep their form in a shadow root.
+    const roots = [doc, ...OL.$$('*', doc).filter((e) => e.shadowRoot).map((e) => e.shadowRoot)];
+    const all = (sel) => roots.flatMap((r) => OL.$$(sel, r));
+    const dialogs = all('[role=dialog], [aria-modal=true], tp-yt-paper-dialog, .weui-desktop-dialog__wrp').filter(OL.visible);
     const inDialog = (el) => dialogs.some((d) => d.contains(el));
-    const pick = (sel, n, all = false) =>
-      OL.$$(sel, doc)
-        .filter((el) => all || OL.visible(el))
+    const pick = (sel, n, every = false) =>
+      all(sel)
+        .filter((el) => every || OL.visible(el))
         .sort((a, b) => inDialog(b) - inDialog(a))
         .slice(0, n)
         .map((el) => (inDialog(el) ? '* ' : '') + desc(el));

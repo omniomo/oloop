@@ -243,3 +243,47 @@ $('submit').onclick=async()=>{if(!uploaded){__log.push('SUBMIT-BEFORE-UPLOAD');r
     cover43:saved.c43&&(await describe([saved.c43]))[0],cover169:saved.c169&&(await describe([saved.c169]))[0]};
   $('form').hidden=true;document.body.insertAdjacentHTML('beforeend','<div>稿件投递成功</div>')};
 </script></body></html>`;
+
+// 视频号助手, shaped like the Nov 2026 page: a wujie micro-app. The form lives in
+// <wujie-app>'s shadow root; its scripts run in a hidden same-origin iframe, and
+// the cover picker only takes a File made in that iframe (instanceof check).
+// 视频号 pre-fills the city; 发表 is "disabled" by class, not attribute.
+export const CHANNELS_EMPTY = '<!doctype html><html><head><meta charset="utf-8"></head><body></body></html>';
+export const CHANNELS_PAGE = `<!doctype html><html><head>${common}</head><body>
+<wujie-app></wujie-app>
+<iframe name="content" src="/empty.html" style="display:none"></iframe>
+<script>
+const sr=document.querySelector('wujie-app').attachShadow({mode:'open'});
+sr.innerHTML=\`<div class="app">
+  <div class="upload"><input type="file" accept="video/mp4,video/x-m4v,video/*" id="vf"></div>
+  <div id="after" hidden>
+    <div class="media-progress" id="mp">0%</div>
+    <div class="cover-preview-wrap"><div class="vertical-img-wrap" style="width:74px;height:98px"><img class="cover-img-vertical" id="cimg" width="74" height="98" alt=""></div><div class="edit-btn">编辑</div></div>
+  </div>
+  <div class="post-desc-box"><div class="input-editor" contenteditable="" data-placeholder="添加描述" id="desc" style="min-height:40px;border:1px solid #ccc"></div></div>
+  <div class="post-short-title-wrap"><input class="weui-desktop-form__input" placeholder="填写短标题有机会获得更多流量" id="st"></div>
+  <div class="post-position-wrap"><div class="position-display" id="pd"><span class="location-name" id="ln">芝加哥</span></div>
+    <div id="opts" hidden><div class="option-item">不显示位置</div><div class="option-item">Michigan &amp; 29th Street</div></div></div>
+  <div class="weui-desktop-btn_wrp"><button class="weui-desktop-btn weui-desktop-btn_primary weui-desktop-btn_disabled" id="pub">发表</button></div>
+  <div class="weui-desktop-dialog__wrp" id="cdlg" style="display:none"><h3>编辑封面</h3><canvas class="cr-image" width="150" height="200"></canvas>
+    <div class="single-cover-uploader-wrap"><input type="file" accept="image/jpeg,image/jpg,image/png" id="cfi"></div><button id="cc">取消</button><button id="ok">确认</button></div>
+</div>\`;
+const $=id=>sr.getElementById(id);let file=null,cover=null,pending=null;
+const W=()=>document.querySelector('iframe[name=content]').contentWindow;
+const markApp=()=>{try{W().__WUJIE={}}catch{}};markApp();document.querySelector('iframe[name=content]').addEventListener('load',markApp);
+const crop=async f=>{const c=sr.querySelector('canvas.cr-image');const g=c.getContext('2d');if(!f){g.fillStyle='#c99';g.fillRect(0,0,c.width,c.height);return}const b=await createImageBitmap(f);g.drawImage(b,0,0,c.width,c.height)};
+$('vf').onchange=e=>{file=e.target.files[0];$('after').hidden=false;
+  const k=document.createElement('canvas');k.width=6;k.height=8;k.getContext('2d').fillRect(0,0,6,8);$('cimg').src=k.toDataURL();
+  let p=0;const iv=setInterval(()=>{p+=25;$('mp').textContent=p+'%';if(p>=100){clearInterval(iv);$('mp').remove();$('pub').classList.remove('weui-desktop-btn_disabled')}},400)};
+$('desc').addEventListener('paste',e=>{e.preventDefault();$('desc').innerText=e.clipboardData.getData('text/plain')});
+$('pd').addEventListener('click',()=>{$('opts').hidden=!$('opts').hidden});
+sr.querySelectorAll('.option-item').forEach(o=>o.addEventListener('click',()=>{$('ln').textContent=o.textContent;$('opts').hidden=true;__log.push('place:'+o.textContent)}));
+sr.querySelector('.edit-btn').addEventListener('click',async()=>{pending=null;await crop(null);$('cdlg').style.display='block';__log.push('cover-open')});
+$('cfi').addEventListener('change',async e=>{const f=e.target.files[0];if(!(f instanceof W().File)){__log.push('cover-wrong-realm');return}
+  if(!/^image\\/(jpeg|png|jpg)$/.test(f.type)){__log.push('cover-rejected:'+f.type);return}pending=f;await crop(f);__log.push('cover-upload')});
+$('cc').onclick=()=>{$('cdlg').style.display='none';__log.push('cover-cancel')};
+$('ok').onclick=()=>{if(pending){cover=pending;$('cimg').src=URL.createObjectURL(pending)}$('cdlg').style.display='none';__log.push('cover-done')};
+$('pub').onclick=async()=>{if($('pub').classList.contains('weui-desktop-btn_disabled')){__log.push('PUBLISH-WHILE-DISABLED');return}
+  window.__posted={desc:$('desc').innerText,shortTitle:$('st').value,place:$('ln').textContent,files:await describe([file]),cover:cover&&(await describe([cover]))[0]};
+  history.pushState({},'','/platform/post/list')};
+</script></body></html>`;

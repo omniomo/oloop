@@ -10,7 +10,7 @@
 // Run state lives in chrome.storage.session so it survives the worker being
 // suspended; the side panel renders straight from it.
 
-import { PLATFORMS, FOREGROUND, TERMINAL } from './lib/platforms.js';
+import { PLATFORMS, FOREGROUND, TERMINAL, accessScripts } from './lib/platforms.js';
 import { t, I18N } from './lib/t.js';
 
 I18N.load();
@@ -24,6 +24,33 @@ const enablePanel = () =>
 chrome.runtime.onInstalled.addListener(enablePanel);
 chrome.runtime.onStartup.addListener(enablePanel);
 enablePanel();
+
+// --- platforms behind optional access ----------------------------------------
+// Their content scripts are registered while the site is allowed, and dropped if
+// the user takes access away in chrome://extensions.
+
+async function syncAccessScripts() {
+  if (!chrome.scripting?.registerContentScripts) return;
+  const have = new Set((await chrome.scripting.getRegisteredContentScripts()).map((s) => s.id));
+  for (const p of Object.values(PLATFORMS)) {
+    if (!p.access) continue;
+    const allowed = await chrome.permissions.contains({ origins: p.access });
+    const scripts = accessScripts(p.id);
+    const missing = scripts.filter((s) => !have.has(s.id));
+    const present = scripts.filter((s) => have.has(s.id)).map((s) => s.id);
+    try {
+      if (allowed && missing.length) await chrome.scripting.registerContentScripts(missing);
+      if (!allowed && present.length) await chrome.scripting.unregisterContentScripts({ ids: present });
+    } catch (e) {
+      console.warn('[oloop] content scripts for', p.id, e);
+    }
+  }
+}
+chrome.runtime.onInstalled.addListener(syncAccessScripts);
+chrome.runtime.onStartup.addListener(syncAccessScripts);
+chrome.permissions.onAdded.addListener(syncAccessScripts);
+chrome.permissions.onRemoved.addListener(syncAccessScripts);
+syncAccessScripts();
 
 // --- run state, serialized through one lock --------------------------------
 
@@ -46,7 +73,7 @@ function mutate(fn) {
 const uid = () => crypto.randomUUID().slice(0, 8);
 
 // Which platform gets the visible tab first: the one with the most UI steps.
-const FRONT_PREFERENCE = ['instagram', 'xiaohongshu', 'naver', 'note', 'tiktok', 'youtube', 'bilibili', 'pinterest', 'threads', 'x'];
+const FRONT_PREFERENCE = ['instagram', 'xiaohongshu', 'naver', 'note', 'channels', 'tiktok', 'youtube', 'bilibili', 'pinterest', 'threads', 'x'];
 const frontRank = (j) => (FRONT_PREFERENCE.indexOf(j.platform) + 100) % 100;
 
 /** Open a tab for every queued job. Safe to call repeatedly. */

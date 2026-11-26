@@ -86,6 +86,7 @@ await panel.click('#cover-use');
 await panel.waitForFunction(() => document.querySelector('#cover-row .val')?.textContent === '0:03.0');
 
 // Only TikTok and Pinterest (X and Instagram start selected).
+if (await panel.$('.more-pf[aria-expanded="false"]')) await panel.click('.more-pf');
 for (const id of ['x', 'instagram', 'tiktok', 'pinterest', 'bilibili']) await panel.click(`.tile[data-platform="${id}"]`);
 
 // Bilibili: its own 4:3 image; 16:9 stays on the video cover.

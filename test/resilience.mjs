@@ -79,6 +79,7 @@ async function publishOnce({ platform, routes, autoSend = false, timeout = 20000
   await panel.waitForFunction(() => document.querySelectorAll('#media-grid .thumb').length === 1);
   await panel.fill('#title', '标题');
   await panel.fill('#text', '弹性测试 resilience');
+  if (await panel.$('.more-pf[aria-expanded="false"]')) await panel.click('.more-pf');
   for (const id of ['x', 'instagram']) if (id !== platform) await panel.click(`.tile[data-platform="${id}"]`);
   if (!['x', 'instagram'].includes(platform)) await panel.click(`.tile[data-platform="${platform}"]`);
   if (autoSend) await panel.click('#auto-send');

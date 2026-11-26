@@ -89,6 +89,7 @@ await panel.waitForFunction(() => document.querySelectorAll('#media-grid .thumb'
 await panel.fill('#title', TITLE);
 await panel.fill('#text', TEXT);
 // X and Instagram start selected; turn on the other eight.
+if (await panel.$('.more-pf[aria-expanded="false"]')) await panel.click('.more-pf');
 for (const id of ['threads', 'xiaohongshu', 'tiktok', 'youtube', 'bilibili', 'pinterest', 'note', 'naver']) await panel.click(`.tile[data-platform="${id}"]`);
 // 小红书 takes images or one video: the image post by default, the video post in the manual run.
 if (MODE === 'manual') {

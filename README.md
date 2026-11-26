@@ -6,7 +6,7 @@
 
 <p align="center">
   Social media on autopilot.<br>
-  A Chrome extension that posts one draft to ten platforms.
+  A Chrome extension that posts one draft to eleven platforms.
 </p>
 
 <p align="center">
@@ -15,7 +15,7 @@
   <img src="site/assets/shots/en/night.webp" width="30%" alt="Dark mode">
 </p>
 
-<p align="center">X · Threads · Instagram · RedNote · TikTok · YouTube · Bilibili · Pinterest · note · Naver Blog</p>
+<p align="center">X · Threads · Instagram · RedNote · WeChat Channels · TikTok · YouTube · Bilibili · Pinterest · note · Naver Blog</p>
 
 Write once in the side panel. Oloop opens each platform's own composer in the browser you're signed into, uploads your media, fills everything in and waits until it's ready. X, Instagram and YouTube can post on their own; the others stop right before Post for you to press.
 

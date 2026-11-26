@@ -1,11 +1,11 @@
-# Chrome Web Store listing — Oloop 0.7.1
+# Chrome Web Store listing — Oloop 0.8.0
 
 Everything the developer dashboard asks for, in the order it asks. Copy each block into its field.
 Images are in `store/images/` (made by `scripts/shots.mjs` + `scripts/store-images.mjs`).
 
 ## Package
 
-- Upload: `dist/oloop-0.7.1.zip` (`npm run pack`).
+- Upload: `dist/oloop-0.8.0.zip` (`npm run pack`).
 - Languages come from `extension/_locales`: en (default), zh_CN, zh_TW, ja, ko, es, fr, de, pt_BR, pt_PT. The dashboard shows a listing tab for each one.
 
 ## Store listing tab
@@ -38,7 +38,7 @@ Free and open source: https://github.com/omniomo/oloop
 ### Description — 简体中文 (zh_CN)
 
 ```
-写一次，十个平台一起发。
+写一次，多个平台一起发。
 
 Oloop 会把你的文字和素材填进各平台的发布页。
 ```
@@ -46,7 +46,7 @@ Oloop 会把你的文字和素材填进各平台的发布页。
 ### Description — 繁體中文 (zh_TW)
 
 ```
-寫一次，十個平台一起發。
+寫一次，多個平台一起發。
 
 Oloop 會把你的文字和素材填進各平台的發布頁。
 ```
@@ -54,7 +54,7 @@ Oloop 會把你的文字和素材填進各平台的發布頁。
 ### Description — 日本語 (ja)
 
 ```
-一度書いて、10 のプラットフォームへ。
+一度書いて、複数のプラットフォームへ。
 
 Oloop が各投稿画面に文章とメディアを入力します。
 ```
@@ -62,7 +62,7 @@ Oloop が各投稿画面に文章とメディアを入力します。
 ### Description — 한국어 (ko)
 
 ```
-한 번 쓰고, 10개 플랫폼에 게시.
+한 번 쓰고, 여러 플랫폼에 게시.
 
 Oloop가 각 플랫폼의 작성 화면에 글과 미디어를 채워 줍니다.
 ```
@@ -70,7 +70,7 @@ Oloop가 각 플랫폼의 작성 화면에 글과 미디어를 채워 줍니다.
 ### Description — Español (es)
 
 ```
-Escribe una vez. Publica en diez plataformas.
+Escribe una vez. Publica en varias plataformas.
 
 Oloop rellena cada publicación con tu texto y tus archivos.
 ```
@@ -78,7 +78,7 @@ Oloop rellena cada publicación con tu texto y tus archivos.
 ### Description — Français (fr)
 
 ```
-Écrivez une fois. Publiez sur dix plateformes.
+Écrivez une fois. Publiez sur plusieurs plateformes.
 
 Oloop ajoute votre texte et vos médias à chaque publication.
 ```
@@ -86,7 +86,7 @@ Oloop ajoute votre texte et vos médias à chaque publication.
 ### Description — Deutsch (de)
 
 ```
-Einmal schreiben. Auf zehn Plattformen posten.
+Einmal schreiben. Auf mehreren Plattformen posten.
 
 Oloop fügt deinen Text und deine Medien in jeden Beitrag ein.
 ```
@@ -94,7 +94,7 @@ Oloop fügt deinen Text und deine Medien in jeden Beitrag ein.
 ### Description — Português (pt_BR, pt_PT)
 
 ```
-Escreva uma vez. Publique em dez plataformas.
+Escreva uma vez. Publique em várias plataformas.
 
 Oloop preenche cada publicação com seu texto e seus arquivos.
 ```
@@ -116,6 +116,8 @@ Oloop publishes one post to several social platforms at once: the user writes a 
 | unlimitedStorage | The images and videos of a draft are kept in IndexedDB on the device until the user posts or clears them; videos often exceed the default quota. |
 | alarms | While a run is publishing, a periodic check notices a platform tab that stopped responding, so it can be retried or reported instead of waiting forever. |
 | Host access (content scripts on x.com, twitter.com, threads.com/.net, instagram.com, tiktok.com, studio.youtube.com, pinterest.com, creator.xiaohongshu.com, member.bilibili.com, note.com, editor.note.com, blog.naver.com) | The extension works inside each platform's own compose page: it attaches the user's media, fills in the title and text, waits for the platform to finish processing, and presses send. It runs only on these sites and only acts in a tab it opened for a post. |
+| scripting | Registers the content scripts for a platform whose site access is optional (WeChat Channels), only after the user allows that site, and removes them if the user takes access away. |
+| Optional host access (channels.weixin.qq.com) | Asked for only when the user turns on WeChat Channels (视频号) in the side panel. Used the same way as the host access above, on that site's own publish page. |
 
 **Remote code:** No, I am not using remote code. (All JavaScript, translations and fonts ship in the package.)
 

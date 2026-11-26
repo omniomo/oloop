@@ -9,6 +9,8 @@
 //           Instagram and Threads carousels 20)
 //   cover:  can upload a custom cover image for the video
 //   beta:   adapter not yet checked against the live site → always stops before sending
+//   access: sites asked for when the platform is first turned on (optional host
+//           permissions), so adding a platform doesn't pause Oloop for everyone on update
 //   options: per-platform settings shown on the card
 
 import { t } from './t.js';
@@ -120,6 +122,20 @@ export const PLATFORMS = {
       { key: 'tags', type: 'text', get label() { return t('Tags'); }, get placeholder() { return t('#topic'); }, default: '' },
     ],
   },
+  channels: {
+    id: 'channels',
+    get name() { return t('WeChat Channels'); },
+    composeUrl: 'https://channels.weixin.qq.com/platform/post/create',
+    access: ['https://channels.weixin.qq.com/*'],
+    // 短标题 is optional: 6–16 characters, and only 《》“”：+？%℃ for punctuation.
+    title: { limit: 16, min: 6, clean: (s) => shortTitle(s), get label() { return t('Short title'); } },
+    body: { limit: 1000, get label() { return t('Description'); } },
+    media: { max: 1, video: true, required: true },
+    cover: true,
+    beta: true,
+    // 视频号 fills in the city it guesses for every post.
+    options: [{ key: 'showLocation', get label() { return t('Show location'); }, type: 'checkbox', default: false }],
+  },
   note: {
     id: 'note',
     name: 'note',
@@ -141,7 +157,9 @@ export const PLATFORMS = {
   },
 };
 
-export const PLATFORM_ORDER = ['x', 'threads', 'instagram', 'xiaohongshu', 'tiktok', 'youtube', 'bilibili', 'pinterest', 'note', 'naver'];
+export const PLATFORM_ORDER = ['x', 'threads', 'instagram', 'xiaohongshu', 'channels', 'tiktok', 'youtube', 'bilibili', 'pinterest', 'note', 'naver'];
+/** Shown behind 「更多」 until opened (or turned on). */
+export const FOLDED = ['pinterest', 'note', 'naver'];
 
 export const STATUS = {
   queued: { get label() { return t('Queued'); }, tone: 'idle' },
@@ -216,6 +234,27 @@ export function titleFrom(text, limit = 100) {
   return line.replace(/[\s，。、,;；:：]+$/, '').replace(/([^.])\.$/, '$1');
 }
 
+/**
+ * 视频号's 短标题: commas become spaces (as its own hint suggests), other
+ * punctuation and emoji go, cut to 16. Under 6 characters there is no short title.
+ */
+export function shortTitle(s) {
+  const kept = (s || '')
+    .replace(/[，,、；;。.!！~～·…—–\-_|/\\]+/g, ' ')
+    .replace(/[^\p{L}\p{N}\s《》“”"'‘’：:+＋？?%％℃]/gu, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const chars = [...kept];
+  let cut = chars.slice(0, 16).join('');
+  // Don't stop inside a Latin word when a space comes late enough.
+  if (chars.length > 16 && /[A-Za-z0-9]/.test(chars[16]) && /[A-Za-z0-9]$/.test(cut)) {
+    const sp = cut.lastIndexOf(' ');
+    if (sp >= 6) cut = cut.slice(0, sp);
+  }
+  cut = cut.trim();
+  return [...cut].length >= 6 ? cut : '';
+}
+
 /** Hashtags written in a body: "#京都 #oloop" → ['京都', 'oloop']. */
 export function hashtags(text) {
   return [...new Set(((text || '').match(/#[^\s#]+/g) || []).map((t) => t.slice(1).replace(/[#，。,.!！?？]+$/, '')).filter(Boolean))];
@@ -242,3 +281,10 @@ export function xLength(text) {
 
 export const textLength = (platformId, text) =>
   PLATFORMS[platformId].body.weighted ? xLength(text) : [...(text || '')].length;
+
+/** Content scripts for a platform behind optional access, registered once it's allowed. */
+export const LOCALE_FILES = ['zh-Hans', 'zh-Hant', 'ja', 'ko', 'es', 'fr', 'de', 'pt'].map((l) => `lib/locales/${l}.js`);
+export const accessScripts = (id) => [
+  { id: `${id}-picker`, matches: PLATFORMS[id].access, js: ['content/picker.js'], world: 'MAIN', runAt: 'document_start', allFrames: true },
+  { id, matches: PLATFORMS[id].access, js: ['lib/i18n.js', ...LOCALE_FILES, 'content/core.js', `content/${id}.js`], runAt: 'document_idle' },
+];
