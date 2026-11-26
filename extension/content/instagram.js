@@ -1,24 +1,45 @@
 // Instagram (instagram.com, desktop web) adapter.
 // Flow: Create → (Post) → select files → crop → Next → edit → Next → caption → Share.
-// Instagram has no stable test ids, so we match visible labels in English,
-// Simplified and Traditional Chinese. Add your UI language here if it differs.
+// Instagram has no stable test ids. Where we can, we go by layout (checked Nov 2026):
+// Next and Share are the text button in the dialog's header row, Create is the
+// plus icon, Original is the crop choice that isn't a ratio. Labels in Oloop's
+// languages are tried first; the rest of the flow doesn't depend on them.
 
 (() => {
   const OL = globalThis.OL;
 
   const L = {
-    create: ['New post', 'Create', '新帖子', '创建', '新貼文', '建立', '发帖'],
-    post: ['Post', '帖子', '貼文'],
-    next: ['Next', '下一步', '繼續', '继续'],
-    share: ['Share', '分享', '分享貼文', '发布', '發佈'],
-    ok: ['OK', '确定', '確定', '好'],
-    crop: ['Select crop', '选择裁剪', '選擇裁切', '選取裁切', 'Crop', '裁剪', '裁切'],
-    original: ['Original', '原图', '原圖', '原始', '原始尺寸', '原尺寸', '原始比例'],
-    fromComputer: ['Select from computer', '从电脑中选择', '從電腦選擇', '从电脑选择'],
+    create: ['New post', 'Create', '新帖子', '创建', '新貼文', '建立', '发帖', '新規投稿', '作成', '새 게시물', '만들기', 'Nueva publicación', 'Crear', 'Nouvelle publication', 'Créer', 'Neuer Beitrag', 'Erstellen', 'Nova publicação', 'Criar'],
+    post: ['Post', '帖子', '貼文', '投稿', '게시물', 'Publicación', 'Publication', 'Beitrag', 'Publicação'],
+    next: ['Next', '下一步', '繼續', '继续', '次へ', '다음', 'Siguiente', 'Suivant', 'Weiter', 'Avançar'],
+    share: ['Share', '分享', '分享貼文', '发布', '發佈', 'シェア', '공유하기', 'Compartir', 'Partager', 'Teilen', 'Compartilhar'],
+    ok: ['OK', '确定', '確定', '好', '확인', 'Aceptar', 'Ok'],
+    crop: ['Select crop', '选择裁剪', '選擇裁切', '選取裁切', 'Crop', '裁剪', '裁切', '切り取りを選択', '자르기 선택', 'Seleccionar recorte', 'Sélectionner le recadrage', 'Zuschnitt auswählen', 'Selecionar corte'],
+    original: ['Original', '原图', '原圖', '原始', '原始尺寸', '原尺寸', '原始比例', 'オリジナル', '원본'],
+    fromComputer: ['Select from computer', '从电脑中选择', '從電腦選擇', '从电脑选择', 'コンピューターから選択', '컴퓨터에서 선택', 'Seleccionar desde la computadora', 'Seleccionar del ordenador', 'Sélectionner depuis l’ordinateur', 'Vom Computer auswählen', 'Selecionar do computador'],
+    notNow: ['Not Now', 'Not now', '以后再说', '以後再說', '稍後再說', '暂不', '後で', '나중에 하기', 'Ahora no', 'Plus tard', 'Jetzt nicht', 'Agora não'],
   };
-  const SHARED = /(post|reel|video)s? (has been |have been |was )?shared|shared your|已分享|已发布|已發佈|分享成功|发布成功|發佈成功/i;
+  const LANGS = ['en', 'zh', 'ja', 'ko', 'es', 'fr', 'de', 'pt'];
+  const SHARED = /(post|reel|video)s? (has been |have been |was )?shared|shared your|已分享|已发布|已發佈|分享成功|发布成功|發佈成功|シェアされました|공유되었습니다|se ha compartido|a été partagé|wurde geteilt|foi compartilhad/i;
+  const RATIO = /^\d+\s*:\s*\d+$/;
 
   const dialogs = () => OL.$$('div[role="dialog"]').filter(OL.visible);
+
+  /** The text button in the header row, right of the title: Next, and Share on the last step. */
+  function headerAction(d) {
+    const h = d && OL.$$('[role="heading"], h1, h2', d).find(OL.visible);
+    if (!h) return null;
+    const hx = h.getBoundingClientRect().x;
+    let row = h.parentElement;
+    for (let i = 0; i < 6 && row && row !== d.parentElement; i++, row = row.parentElement) {
+      const b = OL.$$('[role="button"], button', row).find((x) => OL.visible(x) && OL.text(x) && !x.querySelector('svg') && x.getBoundingClientRect().x > hx);
+      if (b) return b;
+    }
+    return null;
+  }
+  const hasCaption = (d) => !!OL.$$('[contenteditable="true"]', d).find(OL.visible);
+  const nextIn = (d) => d && (OL.findClickable(L.next, d) || (!hasCaption(d) ? headerAction(d) : null));
+  const shareIn = (d) => d && (OL.findClickable(L.share, d) || (hasCaption(d) ? headerAction(d) : null));
 
   /** The file input of an *open* create dialog (Instagram keeps hidden copies around). */
   function fileInput() {
@@ -37,8 +58,8 @@
         (d) =>
           d.querySelector('input[type="file"]') ||
           d.querySelector('[contenteditable="true"]') ||
-          OL.findClickable(L.next, d) ||
-          OL.findClickable(L.share, d),
+          nextIn(d) ||
+          shareIn(d),
       ) || null
     );
   }
@@ -49,10 +70,7 @@
     const boxes = OL.$$('[contenteditable="true"]', d).filter(OL.visible);
     return boxes.find((b) => b.getAttribute('role') === 'textbox') || boxes[0] || null;
   };
-  const shareButton = () => {
-    const d = createDialog();
-    return d && OL.findClickable(L.share, d);
-  };
+  const shareButton = () => shareIn(createDialog());
 
   /** Visible dialog text, leaving out what's typed in editors (the caption could say "已分享"). */
   function dialogText() {
@@ -70,7 +88,7 @@
   async function dismissNags() {
     for (const d of dialogs()) {
       if (d.querySelector('input[type="file"]')) continue;
-      const b = OL.findClickable(['Not Now', 'Not now', '以后再说', '以後再說', '稍後再說', '暂不'], d);
+      const b = OL.findClickable(L.notNow, d);
       if (b) {
         OL.click(b);
         await OL.sleep(600);
@@ -81,7 +99,7 @@
   async function openCreate() {
     if (fileInput()) return;
     const trigger =
-      OL.byIcon(L.create) || OL.findClickable(L.create, document, 'a, [role="link"], [role="button"], button');
+      OL.byIcon(L.create) || OL.byPlusIcon(document, 'a, [role="link"], [role="button"], button') || OL.findClickable(L.create, document, 'a, [role="link"], [role="button"], button');
     if (!trigger) throw new OL.Error(OL.t('Couldn’t find the {platform} Create button. Make sure you are signed in and the window isn’t too narrow.', { platform: 'Instagram' }));
     OL.click(trigger);
 
@@ -94,13 +112,32 @@
     await OL.waitFor(fileInput, { timeout: 10000, what: OL.t('the file picker') });
   }
 
+  /** The crop button: the left-most icon button along the bottom of the crop step. */
+  function cropButton(d) {
+    const byLabel = OL.byIcon(L.crop, d, 'button, [role="button"]');
+    if (byLabel) return byLabel;
+    const box = d.getBoundingClientRect();
+    const icons = OL.$$('button, [role="button"]', d).filter((b) => {
+      const r = b.getBoundingClientRect();
+      return OL.visible(b) && b.querySelector('svg') && !OL.text(b) && r.top > box.top + box.height / 2;
+    });
+    return icons.sort((a, b) => a.getBoundingClientRect().x - b.getBoundingClientRect().x)[0] || null;
+  }
+  /** In the open crop menu, Original is the choice that isn't a ratio. */
+  const originalChoice = (d) =>
+    OL.findClickable(L.original, d, 'button, [role="button"]') ||
+    (() => {
+      const choices = OL.$$('button, [role="button"]', d).filter((b) => OL.visible(b) && b.querySelector('svg') && OL.text(b));
+      return choices.some((b) => RATIO.test(OL.text(b))) ? choices.find((b) => !RATIO.test(OL.text(b))) || null : null;
+    })();
+
   /** Switch the crop from the default 1:1 to Original. Best effort. */
   async function keepOriginal() {
     const d = createDialog();
-    const btn = d && OL.byIcon(L.crop, d, 'button, [role="button"]');
+    const btn = d && cropButton(d);
     if (!btn) return false;
     OL.click(btn);
-    const opt = await OL.waitFor(() => OL.findClickable(L.original, createDialog() || document, 'button, [role="button"]'), {
+    const opt = await OL.waitFor(() => originalChoice(createDialog() || document), {
       timeout: 3000,
       what: OL.t('the Original ratio'),
     }).catch(() => null);
@@ -147,12 +184,14 @@
       files,
       input: fileInput,
       check: () => {
+        // "Video posts are now shared as reels": a small dialog with one button.
         for (const d of dialogs()) {
-          const ok = OL.findClickable(L.ok, d);
+          if (d.querySelector('input[type="file"], [contenteditable="true"], [role="heading"]')) continue;
+          const buttons = OL.$$('button, [role="button"]', d).filter(OL.visible);
+          const ok = OL.findClickable(L.ok, d) || (buttons.length === 1 ? buttons[0] : null);
           if (ok) OL.click(ok);
         }
-        const d = createDialog();
-        return d && OL.findClickable(L.next, d);
+        return nextIn(createDialog());
       },
       started: () => OL.previewCount(createDialog() || document) > 0 || OL.progressHint(createDialog() || document),
       timeout: OL.budget(OL.bytesOf(media), 60_000),
@@ -167,8 +206,7 @@
     // whose edit step has a "Cover photo → Select from computer" entry.
     let coverDone = !(cover && singleVideo);
     for (let i = 0; i < 5 && !captionBox(); i++) {
-      const d = createDialog();
-      const next = d && OL.findClickable(L.next, d);
+      const next = nextIn(createDialog());
       if (next) OL.click(next);
       await OL.sleep(1500);
       if (!coverDone && createDialog() && !captionBox()) coverDone = await setReelCover(cover);
@@ -198,5 +236,5 @@
         return SHARED.test(dialogText()) ? { message: OL.t('Shared') } : null;
       },
     });
-  });
+  }, { langs: LANGS, name: 'Instagram' });
 })();

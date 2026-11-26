@@ -1,16 +1,20 @@
-// Threads (threads.com) adapter. BETA: not yet checked against the live site.
+// Threads (threads.com) adapter. BETA.
 // Flow: open the composer → attach media → type the post → Post.
+// Checked in Nov 2026: "New thread" is the plus in the nav, the composer keeps its
+// file input, and Post is the bottom-most text button. Labels in Oloop's languages
+// are tried first.
 
 (() => {
   const OL = globalThis.OL;
 
   const L = {
-    create: ['New thread', 'Create', '新串文', '新帖子', '创建', '建立', '新建'],
-    prompt: ["What's new?", '有什么新鲜事？', '有什么新鲜事?', '有什麼新鮮事？', '有什麼新鮮事?', 'Empty text field. Type to compose a new post.'],
+    create: ['New thread', 'Create', '新串文', '新帖子', '创建', '建立', '新建', '新規スレッド', '새 스레드', 'Nuevo hilo', 'Nouveau thread', 'Neuer Thread', 'Novo thread'],
+    prompt: ["What's new?", 'What’s new?', '有什么新鲜事？', '有什么新鲜事?', '有什麼新鮮事？', '有什麼新鮮事?', 'Empty text field. Type to compose a new post.'],
     attach: ['Attach media', 'Add media', 'Add photos and videos', '附加媒体', '附加媒體', '添加媒体', '新增媒體'],
-    post: ['Post', '发布', '發佈', '發布', '发帖'],
-    posted: /^(Posted|已发布|已發佈|已发帖|已發布)$/m,
+    post: ['Post', '发布', '發佈', '發布', '发帖', '投稿', '게시', 'Publicar', 'Publier', 'Posten'],
+    posted: /^(Posted|已发布|已發佈|已发帖|已發布|投稿しました|게시됨|Publicado|Publié|Gepostet)$/m,
   };
+  const LANGS = ['en', 'zh', 'ja', 'ko', 'es', 'fr', 'de', 'pt'];
 
   const dialogs = () => OL.$$('div[role="dialog"]').filter(OL.visible);
   const composer = () => dialogs().find((d) => d.querySelector('[contenteditable="true"]')) || null;
@@ -23,7 +27,11 @@
     if (!d) return null;
     const want = L.post.map((x) => x.toLowerCase());
     const all = OL.$$(OL.CLICKABLE, d).filter((el) => OL.visible(el) && want.includes(OL.text(el).toLowerCase()));
-    return all[all.length - 1] || null; // the main Post button sits at the bottom
+    if (all.length) return all[all.length - 1]; // the main Post button sits at the bottom
+    // Any language: the bottom-most, then right-most, text button without an icon.
+    const words = OL.$$('[role="button"], button', d).filter((el) => OL.visible(el) && OL.text(el) && !el.querySelector('svg'));
+    const at = (el) => el.getBoundingClientRect();
+    return words.sort((a, b) => at(b).bottom - at(a).bottom || at(b).right - at(a).right)[0] || null;
   };
 
   async function openComposer() {
@@ -33,6 +41,7 @@
       () =>
         OL.findClickable(L.create, document, '[role="button"], a, button') ||
         OL.byIcon(L.create) ||
+        OL.byPlusIcon(OL.$('[role="navigation"]') || document, '[role="button"], a, button') ||
         OL.findClickable(L.prompt, document, '[role="button"], div[tabindex], span, a'),
       { timeout: 30000, what: OL.t('{what} (make sure this browser is signed in to {platform})', { what: OL.t('the {platform} create button', { platform: 'Threads' }), platform: 'Threads' }) },
     );
@@ -108,5 +117,5 @@
         return { ok: false, message: OL.t('The composer closed without a posted notice. Check your profile.') };
       },
     });
-  });
+  }, { langs: LANGS, name: 'Threads' });
 })();

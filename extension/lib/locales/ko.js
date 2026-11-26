@@ -180,6 +180,7 @@
   "Naver Blog": "네이버 블로그",
   "WeChat Channels": "위챗 채널스",
   "Short title": "짧은 제목",
+  "{base}. {platform} is shown in a language Oloop may not read ({lang}). Switch {platform} to English or Chinese and try again.": "{base}. {platform}의 표시 언어({lang})는 Oloop이 읽지 못할 수 있어요. {platform}을 영어나 중국어로 바꾼 뒤 다시 시도해 주세요.",
   "Show fewer": "접기",
   "Show location": "위치 표시",
   "The location is still shown; change it before you post": "위치가 그대로 표시돼요. 게시하기 전에 페이지에서 바꿔 주세요",

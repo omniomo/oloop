@@ -43,27 +43,32 @@ btn.addEventListener('click',async()=>{
 });
 </script></body></html>`;
 
-export const IG_PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>Instagram</title></head><body>${common}
-<nav><a role="link" href="#" id="create"><svg aria-label="New post" width="24" height="24"><rect width="24" height="24"/></svg><span>Create</span></a></nav>
-<div id="nag" role="dialog"><p>Turn on Notifications</p><button id="notnow">Not Now</button></div>
-<div id="menu" hidden><a href="#" id="postItem"><svg aria-label="Post" width="20" height="20"><rect width="20" height="20"/></svg><span>Post</span></a></div>
+// Instagram, laid out like the Nov 2026 page: Create is a plus icon; each step of
+// the dialog has a header row (Back icon · title · text action: Next, then Share);
+// the crop button is the left-most icon along the bottom, its menu lists Original
+// and ratios. Tests swap the words for another language (see test/lang.mjs).
+export const IG_PAGE = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Instagram</title>
+<style>.hd{display:flex;justify-content:space-between;align-items:center;width:600px}.bar{display:flex;justify-content:space-between;width:600px;margin-top:40px}</style></head><body>${common}
+<nav><a role="link" href="#" id="create"><svg aria-label="New post" width="24" height="24" viewBox="0 0 24 24"><path d="M21 11h-8V3a1 1 0 1 0-2 0v8H3a1 1 0 1 0 0 2h8v8a1 1 0 1 0 2 0v-8h8a1 1 0 1 0 0-2Z"/></svg><span>Create</span></a></nav>
+<div id="nag" role="dialog"><p>Turn on Notifications</p><button>Turn On</button><button id="notnow">Not Now</button></div>
 <div id="reels" role="dialog" hidden><p>Video posts are now shared as reels</p><button id="reelsok">OK</button></div>
-<div id="cd" role="dialog" hidden>
-  <div id="s-select"><h1>Create new post</h1><button>Select from computer</button>
+<div id="cd" role="dialog" hidden style="width:600px">
+  <div id="s-select"><div class="hd"><span></span><div role="heading">Create new post</div><span></span></div><button>Select from computer</button>
     <form enctype="multipart/form-data"><input id="fi" type="file" multiple accept="image/jpeg,image/png,video/mp4" style="display:none"></form></div>
-  <div id="s-crop" hidden><span>Crop</span><div role="button" id="n1">Next</div>
-    <button id="cropBtn"><svg aria-label="Select crop" width="16" height="16"><rect width="16" height="16"/></svg></button>
-    <div id="ratios" hidden><button id="orig"><span>Original</span><svg aria-label="Photo outline icon" width="10" height="10"></svg></button><button><span>1:1</span></button></div></div>
-  <div id="s-edit" hidden><span>Edit</span><div role="button" id="n2">Next</div></div>
-  <div id="s-cap" hidden><span>Create new post</span><div role="button" id="share">Share</div>
+  <div id="s-crop" hidden>
+    <div class="hd"><div role="button"><svg aria-label="Back" width="16" height="16"><rect width="16" height="16"/></svg></div><div role="heading">Crop</div><div role="button" id="n1">Next</div></div>
+    <div style="height:200px"></div>
+    <div id="ratios" hidden><div role="button" id="orig"><svg aria-label="Photo outline icon" width="10" height="10"><rect width="10" height="10"/></svg><span>Original</span></div><div role="button"><svg aria-label="Crop square icon" width="10" height="10"><rect width="10" height="10"/></svg><span>1:1</span></div><div role="button"><svg aria-label="Crop portrait icon" width="10" height="10"><rect width="10" height="10"/></svg><span>4:5</span></div></div>
+    <div class="bar"><span><button id="cropBtn"><svg aria-label="Select crop" width="16" height="16"><rect width="16" height="16"/></svg></button><button><svg aria-label="Select zoom" width="16" height="16"><rect width="16" height="16"/></svg></button></span><button><svg aria-label="Open media gallery" width="16" height="16"><rect width="16" height="16"/></svg></button></div></div>
+  <div id="s-edit" hidden><div class="hd"><div role="button"><svg aria-label="Back" width="16" height="16"><rect width="16" height="16"/></svg></div><div role="heading">Edit</div><div role="button" id="n2">Next</div></div></div>
+  <div id="s-cap" hidden><div class="hd"><div role="button"><svg aria-label="Back" width="16" height="16"><rect width="16" height="16"/></svg></div><div role="heading">Create new post</div><div role="button" id="share">Share</div></div>
     <div id="cap" contenteditable="true" role="textbox" aria-label="Write a caption..." style="min-height:40px;border:1px solid #ccc"></div></div>
   <div id="s-done" hidden></div>
 </div>
 <script>
 const $=id=>document.getElementById(id);let files=[],ratio='1:1';
 $('notnow').onclick=()=>$('nag').remove();
-$('create').onclick=e=>{e.preventDefault();$('menu').hidden=false};
-$('postItem').onclick=e=>{e.preventDefault();$('menu').hidden=true;$('cd').hidden=false};
+$('create').onclick=e=>{e.preventDefault();$('cd').hidden=false};
 $('fi').onchange=e=>{files=[...e.target.files];$('s-select').hidden=true;$('s-crop').hidden=false;
   if(files.some(f=>f.type.startsWith('video/')))$('reels').hidden=false};
 $('reelsok').onclick=()=>{$('reels').hidden=true;__log.push('reels-ok')};

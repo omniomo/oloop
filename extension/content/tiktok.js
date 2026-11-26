@@ -12,14 +12,16 @@
     editCover: ['[data-e2e="cover_container"] .cover-container', '[data-e2e="cover_container"] [class*="edit-container"]'],
     coverImage: '[data-e2e="cover_container"] img',
     removeUploaded: '[aria-label="Delete uploaded image"], [aria-label*="delete" i][aria-label*="upload" i], [aria-label*="删除"], [aria-label*="刪除"]',
+    uploadArea: '[class*="ImageUpload__uploadArea"]',
+    headerButton: 'button[class*="header-button"]', // the editor's Cancel, Save (in that order)
   };
   const L = {
     post: ['Post', '发布', '發佈', '發布'],
     editCover: ['Edit cover', '编辑封面', '編輯封面', 'Select cover', '选择封面', '選擇封面'],
     uploadCover: ['Upload cover', 'Upload cover image', '上传封面', '上傳封面', 'Upload image', '上传图片', '上傳圖片'],
-    confirm: ['Save', '保存', '儲存', 'Confirm', '确认', '確認', 'Done', '完成'],
-    cancel: ['Cancel', '取消'],
-    posted: /(video|post) (has been|was) (posted|published|uploaded)|视频已发布|影片已發佈|已发布|已發佈|发布成功/i,
+    confirm: ['Save', '保存', '儲存', 'Confirm', '确认', '確認', 'Done', '完成', '저장', 'Guardar', 'Enregistrer', 'Speichern', 'Salvar'],
+    cancel: ['Cancel', '取消', 'キャンセル', '취소', 'Cancelar', 'Annuler', 'Abbrechen'],
+    posted: /(video|post) (has been|was) (posted|published|uploaded)|视频已发布|影片已發佈|已发布|已發佈|发布成功|投稿しました|게시되었습니다|se publicó|a été publiée|wurde gepostet|foi publicado/i,
   };
 
   /** Studio is top-level; the older uploader lived in a same-origin iframe. */
@@ -65,12 +67,16 @@
       { timeout: 10000 },
     );
     if (!dlg) return false;
+    const headerButtons = () => OL.$$(SEL.headerButton, dlg).filter((b) => OL.visible(b) && OL.text(b));
     const cancel = () => {
-      const b = OL.findClickable(L.cancel, dlg, 'button');
+      const b = OL.findClickable(L.cancel, dlg, 'button') || headerButtons()[0];
       if (b) OL.click(b);
     };
     // A cover uploaded earlier hides the upload input until it's removed.
-    if (!imageInput(dlg)) OL.click(removeUploaded(dlg));
+    if (!imageInput(dlg)) {
+      const rm = removeUploaded(dlg) || OL.$$('[class*="ImageUpload"] button', dlg).find(OL.visible);
+      if (rm) OL.click(rm);
+    }
     const input = await OL.tryWaitFor(() => imageInput(dlg), { timeout: 5000 });
     if (!input) {
       cancel();
@@ -80,14 +86,14 @@
     if (input.accept && !input.accept.split(/\s*,\s*/).includes(file.type)) file = await OL.toJpeg(file);
     OL.setFiles(input, [file]);
     // The upload label gives way to the image once TikTok has taken it.
-    const took = await OL.tryWaitFor(() => !OL.findClickable(L.uploadCover, dlg) || null, { timeout: 15000 });
+    const took = await OL.tryWaitFor(() => (!OL.findClickable(L.uploadCover, dlg) && !OL.$$(SEL.uploadArea, dlg).some(OL.visible)) || null, { timeout: 15000 });
     if (!took) {
       cancel();
       return false;
     }
     await OL.sleep(800);
     const save = await OL.tryWaitFor(() => {
-      const b = OL.findClickable(L.confirm, dlg, 'button');
+      const b = OL.findClickable(L.confirm, dlg, 'button') || headerButtons().at(-1);
       return b && !OL.isDisabled(b) ? b : null;
     }, { timeout: 15000 });
     if (!save) {

@@ -180,6 +180,7 @@
   "Naver Blog": "Naver 部落格",
   "WeChat Channels": "視頻號",
   "Short title": "短標題",
+  "{base}. {platform} is shown in a language Oloop may not read ({lang}). Switch {platform} to English or Chinese and try again.": "{base}。{platform} 的介面語言（{lang}）Oloop 可能讀不懂。請把 {platform} 切換成中文或英文後再試。",
   "Show fewer": "收合",
   "Show location": "顯示位置",
   "The location is still shown; change it before you post": "位置仍會顯示，發表前請在頁面上改掉",

@@ -35,7 +35,7 @@
     coverDone: ['Done', 'Save', 'Apply', '完成', '保存', '儲存', '套用', '完了', '保存する', '완료', '저장', 'Listo', 'Guardar', 'Terminé', 'Enregistrer', 'Fertig', 'Speichern', 'Concluído', 'Salvar'],
     notBoards: /^(create board|create|创建图板|建立圖版|search|搜索|搜尋|all boards|所有图板|top choices|save|保存|board|choose a board|选择图板|選擇圖版)$/i,
     noBoard: /choose a board|选择图板|選擇圖版|选择一个图板/i,
-    published: /your pin (has been|was) (published|saved)|pin (has been )?published|已发布|已發佈|发布成功/i,
+    published: /your pin (has been|was) (published|saved)|pin (has been )?published|已发布|已發佈|发布成功|公開されました|게시되었습니다|se publicó|a été publiée|wurde veröffentlicht|foi publicado/i,
   };
 
   const enabled = (el) => !!el && !el.disabled && el.getAttribute('aria-disabled') !== 'true' && el.getAttribute('contenteditable') !== 'false';

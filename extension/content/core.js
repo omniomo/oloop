@@ -258,6 +258,16 @@
     return svg ? svg.closest(closest) : null;
   };
 
+  /**
+   * A "create" control drawn as a plus, found by its icon's shape rather than its
+   * (translated) label: Instagram's and Threads' plus paths as of Nov 2026.
+   */
+  const PLUS = ['M21 11h-8V3a1 1 0 1 0-2 0v8H3', 'M12 2a1 1 0 0 1 1 1v8h8'];
+  OL.byPlusIcon = (root = document, closest = CLICKABLE) => {
+    const path = OL.$$('svg path', root).find((p) => PLUS.some((d) => (p.getAttribute('d') || '').startsWith(d)) && OL.visible(p.closest('svg')));
+    return path ? path.closest(closest) : null;
+  };
+
   /** First visible element matching any of the selectors, in order of preference. */
   OL.first = (selectors, root = document) => {
     for (const sel of selectors) {
@@ -610,6 +620,11 @@
       return { message: OL.t('{base} (the tab stayed in the background, so the page may have paused)', { base }), retryable: true };
     }
     if (e?.code === 'timeout') {
+      // Steps that read a button's words fail quietly in a language we don't know.
+      const lang = (doc.documentElement?.lang || '').toLowerCase().split('-')[0];
+      if (OL.langs && lang && !OL.langs.includes(lang)) {
+        return { message: OL.t('{base}. {platform} is shown in a language Oloop may not read ({lang}). Switch {platform} to English or Chinese and try again.', { base, platform: OL.platformName, lang: doc.documentElement.lang }), retryable: true };
+      }
       return { message: OL.t('{base}. The network may be slow, or the page changed. Copy the diagnostics and send them to the maintainers.', { base }), retryable: true };
     }
     return { message: base, retryable: e?.retryable ?? e instanceof OLError };
@@ -617,8 +632,14 @@
 
   // --- lifecycle ----------------------------------------------------------------
 
-  OL.register = (platform, adapter, { doc } = {}) => {
+  /**
+   * langs: the page languages whose button words this adapter knows (only needed
+   * where it reads words); with name, a timeout on a page in another language says so.
+   */
+  OL.register = (platform, adapter, { doc, langs, name } = {}) => {
     if (window.top !== window) return;
+    OL.langs = langs || null;
+    OL.platformName = name || platform;
     chrome.runtime.onMessage.addListener((msg) => {
       if (msg?.type === 'job:abort' && OL.job && msg.jobId === OL.job.id) aborted = true;
     });

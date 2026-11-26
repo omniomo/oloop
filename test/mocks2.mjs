@@ -10,22 +10,26 @@ window.__log=[];
 function pickFiles(accept,multiple,cb){const i=document.createElement('input');i.type='file';i.accept=accept;i.multiple=multiple;i.addEventListener('change',()=>cb([...i.files]));i.click()}
 </script>`;
 
-export const THREADS_PAGE = `<!doctype html><html><head>${common}</head><body>
-<nav><div role="button" tabindex="0" id="create" aria-label="New thread"><svg width="24" height="24"><rect width="24" height="24"/></svg></div></nav>
+// Threads, laid out like the Nov 2026 page: "New thread" is the plus in the nav;
+// the composer keeps its file input; Post is the bottom-most text button.
+export const THREADS_PAGE = `<!doctype html><html lang="en"><head>${common}</head><body>
+<div role="navigation"><div role="button" tabindex="0" id="create"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 2a1 1 0 0 1 1 1v8h8a1 1 0 1 1 0 2h-8v8a1 1 0 1 1-2 0v-8H3a1 1 0 1 1 0-2h8V3a1 1 0 0 1 1-1Z"/></svg><span>New thread</span></div></div>
 <div role="button" aria-label="Empty text field. Type to compose a new post.">What’s new?</div>
 <div id="dlg" role="dialog" hidden>
+  <div role="button" id="cancel">Cancel</div>
   <div id="ed" contenteditable="true" role="textbox" aria-label="Empty text field. Type to compose a new post." style="min-height:40px;border:1px solid #ccc"></div>
   <div id="prev"></div>
-  <div role="button" id="attach"><svg aria-label="Attach media" width="20" height="20"><rect width="20" height="20"/></svg></div>
-  <div role="button" id="post" aria-disabled="true">Post</div>
+  <div role="button" id="attach"><svg aria-label="Attach media" width="20" height="20"><rect width="20" height="20"/></svg><input type="file" id="fi" multiple accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" style="display:none"></div>
+  <div role="button" aria-disabled="true" id="add">Add to thread</div>
+  <div style="display:flex;justify-content:space-between;margin-top:20px"><div role="button"><svg width="12" height="12"><rect width="12" height="12"/></svg>Post options</div><div role="button" id="post" aria-disabled="true">Post</div></div>
 </div>
 <script>
 const $=id=>document.getElementById(id);let files=[];
 $('create').onclick=()=>{$('dlg').hidden=false};
 const refresh=()=>$('post').setAttribute('aria-disabled',String(!($('ed').innerText.trim()||files.length)));
 $('ed').addEventListener('input',refresh);
-$('attach').onclick=()=>pickFiles('image/*,video/*',true,fs=>{files=fs;for(const f of fs){const u=URL.createObjectURL(f);
-  const n=document.createElement(f.type.startsWith('video')?'video':'img');n.src=u;n.width=40;$('prev').appendChild(n)}refresh()});
+$('fi').onchange=e=>{files=[...e.target.files];for(const f of files){const u=URL.createObjectURL(f);
+  const n=document.createElement(f.type.startsWith('video')?'video':'img');n.src=u;n.width=40;$('prev').appendChild(n)}refresh()};
 $('post').onclick=async()=>{if($('post').getAttribute('aria-disabled')==='true')return;
   window.__posted={text:$('ed').innerText,files:await describe(files)};$('dlg').remove();
   const t=document.createElement('div');t.innerHTML='<div><span>Posted</span> <a href="/@omniomo/post/ABC123">View</a></div>';document.body.appendChild(t)};

@@ -180,6 +180,7 @@
   "Naver Blog": "Blog da Naver",
   "WeChat Channels": "WeChat Channels",
   "Short title": "Título curto",
+  "{base}. {platform} is shown in a language Oloop may not read ({lang}). Switch {platform} to English or Chinese and try again.": "{base}. O {platform} está num idioma que o Oloop talvez não leia ({lang}). Mude o {platform} para inglês ou chinês e tente de novo.",
   "Show fewer": "Menos",
   "Show location": "Mostrar localização",
   "The location is still shown; change it before you post": "A localização continua visível; altere antes de publicar",
